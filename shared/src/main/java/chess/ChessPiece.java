@@ -1,5 +1,7 @@
 package chess;
 
+import chess.moves_calculator.PieceMovesCalculator;
+
 import java.util.Collection;
 
 /**
@@ -51,11 +53,26 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-
+        ChessPiece typeOfPiece = board.getPiece(myPosition);
+        switch (typeOfPiece) {
+            case PieceType.KING:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            case PieceType.QUEEN:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            case PieceType.BISHOP:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            case PieceType.KNIGHT:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            case PieceType.ROOK:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            case PieceType.PAWN:
+                return PieceMovesCalculator.pieceMoves(board, myPosition);
+            default:
+                throw new RuntimeException("Unknown piece type");
+        }
 //        use switch cases
 //        consider color
 //        consider piece type
-//        consider if you are still in the board
 
     }
 }
