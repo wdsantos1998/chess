@@ -54,25 +54,32 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece typeOfPiece = board.getPiece(myPosition);
-        switch (typeOfPiece) {
-            case PieceType.KING:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            case PieceType.QUEEN:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            case PieceType.BISHOP:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            case PieceType.KNIGHT:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            case PieceType.ROOK:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            case PieceType.PAWN:
-                return PieceMovesCalculator.pieceMoves(board, myPosition);
-            default:
-                throw new RuntimeException("Unknown piece type");
-        }
-//        use switch cases
-//        consider color
-//        consider piece type
 
+        PieceMovesCalculator pieceMovesCalculator;
+
+        switch (typeOfPiece.getPieceType()) {
+            case KING:
+                pieceMovesCalculator = new KingMovesCalculator();
+                break;
+            case QUEEN:
+                pieceMovesCalculator = new QueenMovesCalculator();
+                break;
+            case BISHOP:
+                pieceMovesCalculator = new BishopMovesCalculator();
+                break;
+            case KNIGHT:
+                pieceMovesCalculator = new KnightMovesCalculator();
+                break;
+            case ROOK:
+                pieceMovesCalculator = new RookMovesCalculator();
+                break;
+            case PAWN:
+                pieceMovesCalculator = new PawnMovesCalculator();
+                break;
+            default:
+                throw new RuntimeException("Unknown piece type: " + typeOfPiece.getPieceType());
+        }
+
+        return pieceMovesCalculator.calculateMoves(board, myPosition);
     }
 }
