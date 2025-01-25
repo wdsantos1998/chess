@@ -10,8 +10,8 @@ import java.util.Collection;
 
 public class KingMovesCalculator implements PieceMovesCalculator {
 
-    private Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
-        int[][] moves = {
+    private int[][] getKingMoves() {
+        return new int[][]{
                 //{row, col}
                 {-1, -1}, //Diagonal-left (Moving Down)
                 {-1, 0}, //Down
@@ -22,15 +22,17 @@ public class KingMovesCalculator implements PieceMovesCalculator {
                 {1, 0}, //Up
                 {1, 1}, //Diagonal-right (Moving Up)
         };
-        return calculateMoves(board, myPosition);
     }
 
     @Override
     public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> kingMoves = getKingMoves(board, myPosition);
+        int[][] kingMoves = getKingMoves();
         Collection<ChessMove> validMoves = new ArrayList<>();
-        for (ChessMove move : kingMoves) {
-            ChessPosition newPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+
+        for (int[] move : kingMoves) {
+            int newRow = myPosition.getRow() + move[0];
+            int newCol = myPosition.getColumn() + move[1];
+            ChessPosition newPos = new ChessPosition(newRow, newCol);
 
             if (isValidMove(board, myPosition, newPos)) {
                 validMoves.add(new ChessMove(myPosition, newPos, null));
@@ -51,7 +53,7 @@ public class KingMovesCalculator implements PieceMovesCalculator {
             return true;
         }
 
-        if (myPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
+        else if (myPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
             return false;
         }
 

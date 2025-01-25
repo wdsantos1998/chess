@@ -31,7 +31,6 @@ public class ChessMove {
      * @return ChessPosition of ending location
      */
     public ChessPosition endPosition() {
-
         return endPosition;
     }
 
@@ -54,11 +53,29 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(endPosition, chessMove.endPosition) && Objects.equals(startPosition, chessMove.startPosition) && promotionPiece == chessMove.promotionPiece;
+        System.out.println("chessMove: " + chessMove.toString());
+        boolean startPosition = this.startPosition.equals(chessMove.startPosition);
+        System.out.println("startPosition: " + startPosition);
+        boolean endPosition = this.endPosition.equals(chessMove.endPosition);
+        System.out.println("endPosition: " + endPosition);
+        boolean promotionPiece = Objects.equals(this.promotionPiece, chessMove.promotionPiece);
+        System.out.println("promotionPiece: " + promotionPiece);
+        boolean returnValue = startPosition && endPosition && promotionPiece;
+        System.out.println("returnValue: " + returnValue);
+        return returnValue;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, promotionPiece);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessMove{" +
+                "startPosition=" + "("+ startPosition.getRow() +","+ startPosition.getColumn()+")" +
+                ", endPosition=" + "("+ endPosition.getRow() +","+endPosition.getColumn() +")" +
+                ", promotionPiece=" + promotionPiece +
+                '}';
     }
 }
