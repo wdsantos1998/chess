@@ -60,7 +60,6 @@ public class ChessPiece {
 
         switch (typeOfPiece.getPieceType()) {
             case KING:
-                System.out.println("King being moved");
                 pieceMovesCalculator = new KingMovesCalculator();
                 break;
             case QUEEN:
