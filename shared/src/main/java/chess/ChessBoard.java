@@ -42,7 +42,26 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                squares[row][col] = null;
+            }
+        }
+
+        for (int col = 0 ; col < 8 ; col++){
+            squares[1][col] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            squares[6][col] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+        }
+
+        ChessPiece.PieceType[] pieces = {ChessPiece.PieceType.ROOK,ChessPiece.PieceType.KNIGHT,ChessPiece.PieceType.BISHOP,ChessPiece.PieceType.QUEEN,ChessPiece.PieceType.KING,ChessPiece.PieceType.BISHOP,ChessPiece.PieceType.KNIGHT,ChessPiece.PieceType.ROOK};
+        int[] rows = {0, 7};
+        ChessGame.TeamColor[] colors = {ChessGame.TeamColor.WHITE, ChessGame.TeamColor.BLACK};
+
+        for (int i = 0 ; i < 2 ; i++){
+            for (int col = 0 ; col < 8 ; col++){
+                squares[rows[i]][col] = new ChessPiece(colors[i], pieces[col]);
+            }
+        }
     }
 
     @Override
