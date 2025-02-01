@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -16,6 +18,7 @@ public class ChessGame {
     public ChessGame() {
         this.board = new ChessBoard();
         this.board.resetBoard();
+        setTeamTurn(TeamColor.WHITE);
     }
 
     /**
@@ -34,8 +37,13 @@ public class ChessGame {
         this.teamTurn = team;
     }
 
-    public void GameIsOver() {
-        isGameOver = true;
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        isGameOver = gameOver;
     }
 
     /**
@@ -54,7 +62,37 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece myPiece = board.getPiece(startPosition);
+        if (myPiece == null) {
+            return null;
+        }
+        return myPiece.pieceMoves(this.board, startPosition);
+    }
+
+    /**
+     * Locates the king of the given team
+     *
+     * @param teamColor which team to find the king for
+     * @return the location of the king
+     * or null if the king is not found
+     */
+
+    private int[] getKingLocation(ChessGame.TeamColor teamColor) {
+        ChessPiece.PieceType king = ChessPiece.PieceType.KING;
+        int [] KingLocation = new int[2];
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                ChessPosition position = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(position);
+                if(piece == null){
+                    continue;
+                }
+                if(piece.getPieceType() == king && piece.getTeamColor() == teamColor){
+                    KingLocation = new int[] {i,j};
+                }
+            }
+        }
+        return KingLocation;
     }
 
     /**
@@ -74,7 +112,42 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        int[] kingLocation = getKingLocation(teamColor);
+        ChessGame.TeamColor opponentColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        Collection<ChessMove> opponentMoves = getOpponentPossibleMoves(opponentColor);
+        for(ChessMove move : opponentMoves){
+            if(move.getEndPosition().getRow() == kingLocation[0] && move.getEndPosition().getColumn() == kingLocation[1]){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns all possible moves for the opponent of the given team
+     *
+     * @param teamColor opponent's team color
+     * @return A collection of all possible moves for the opponent
+     */
+    private Collection<ChessMove> getOpponentPossibleMoves(ChessGame.TeamColor teamColor){
+        Collection<ChessMove> moves = new ArrayList<>();
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                ChessPosition position = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(position);
+                if(piece == null){
+                    continue;
+                }
+                if(piece.getTeamColor() != teamColor){
+                    continue;
+                }
+                if(piece.getPieceType() == ChessPiece.PieceType.KING){
+                    continue;
+                }
+                moves.addAll(piece.pieceMoves(board, position));
+            }
+        }
+        return moves;
     }
 
     /**
@@ -84,7 +157,19 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        //This function needs to call for game over if the king is in checkmate
+        //I need to check for:
+        //1. If the king is in check (Done)
+        //2. If the king has no legal moves (Done - It's being checked inside the isInCheck method)
+        //3. No friendly pieces can block the check
+        //4. No friendly pieces can capture the attacking piece
+        boolean inCheck = isInCheck(teamColor);
+        if(!inCheck){
+            return false;
+        }
+        int[] kingLocation = getKingLocation(teamColor);
+        Collection<ChessMove> kingMoves = validMoves(new ChessPosition(kingLocation[0],kingLocation[1]));
+        return kingMoves.isEmpty();
     }
 
     /**
@@ -97,6 +182,7 @@ public class ChessGame {
 
     //If the king is not in check, but the player has no legal moves, then it's a stalemate.
     public boolean isInStalemate(TeamColor teamColor) {
+        //I need to set a draw condition if the king is not in check but has no legal moves
         throw new RuntimeException("Not implemented");
     }
 
@@ -106,7 +192,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
@@ -115,6 +201,32 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return isGameOver == chessGame.isGameOver && Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn, isGameOver);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "board=" + board +
+                ", teamTurn=" + teamTurn +
+                ", isGameOver=" + isGameOver +
+                '}';
     }
 }
