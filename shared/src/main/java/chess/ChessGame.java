@@ -94,6 +94,8 @@ public class ChessGame {
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
      */
+
+    //If the king is not in check, but the player has no legal moves, then it's a stalemate.
     public boolean isInStalemate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
     }
