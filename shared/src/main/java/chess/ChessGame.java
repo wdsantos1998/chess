@@ -66,7 +66,14 @@ public class ChessGame {
         if (myPiece == null) {
             return null;
         }
-        return myPiece.pieceMoves(this.board, startPosition);
+        Collection<ChessMove> moves = myPiece.pieceMoves(this.board, startPosition);
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        for(ChessMove move : moves){
+            if(isMoveValid(move)){
+                validMoves.add(move);
+            }
+        }
+        return validMoves;
     }
 
     /**
@@ -114,7 +121,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         int[] kingLocation = getKingLocation(teamColor);
         ChessGame.TeamColor opponentColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        Collection<ChessMove> opponentMoves = getOpponentPossibleMoves(opponentColor);
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
         for(ChessMove move : opponentMoves){
             if(move.getEndPosition().getRow() == kingLocation[0] && move.getEndPosition().getColumn() == kingLocation[1]){
                 return true;
@@ -129,7 +136,7 @@ public class ChessGame {
      * @param teamColor opponent's team color
      * @return A collection of all possible moves for the opponent
      */
-    private Collection<ChessMove> getOpponentPossibleMoves(ChessGame.TeamColor teamColor){
+    private Collection<ChessMove> getTeamPossibleMoves(ChessGame.TeamColor teamColor){
         Collection<ChessMove> moves = new ArrayList<>();
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++){
@@ -141,9 +148,11 @@ public class ChessGame {
                 if(piece.getTeamColor() != teamColor){
                     continue;
                 }
-                if(piece.getPieceType() == ChessPiece.PieceType.KING){
-                    continue;
-                }
+                //I need and edge case to when the piece is the King
+
+//                if(piece.getPieceType() == ChessPiece.PieceType.KING){
+//                    getKingPossibleMoves(piece);
+//                }
                 moves.addAll(piece.pieceMoves(board, position));
             }
         }
@@ -160,17 +169,67 @@ public class ChessGame {
         //This function needs to call for game over if the king is in checkmate
         //I need to check for:
         //1. If the king is in check (Done)
-        //2. If the king has no legal moves (Done - It's being checked inside the isInCheck method)
+        //2. If the king has no legal moves (Done)
         //3. No friendly pieces can block the check
-        //4. No friendly pieces can capture the attacking piece
+        //4. No friendly pieces can capture the attacking piece (Done)
         boolean inCheck = isInCheck(teamColor);
         if(!inCheck){
             return false;
         }
         int[] kingLocation = getKingLocation(teamColor);
-        Collection<ChessMove> kingMoves = validMoves(new ChessPosition(kingLocation[0],kingLocation[1]));
-        return kingMoves.isEmpty();
+        ChessPosition kingPosition = new ChessPosition(kingLocation[0], kingLocation[1]);
+        if(kingHasValidMoves(kingPosition)){
+            return false;
+        }
+        if(friendlyPieceCanCaptureAttacker(kingPosition,teamColor)){
+            return false;
+        }
+        if(friendlyPieceCanBlockAttacker(kingPosition,teamColor)){
+            return false;
+        }
+        return true;
     }
+
+    private boolean friendlyPieceCanBlockAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
+
+        return false;
+    }
+
+    private boolean friendlyPieceCanCaptureAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
+        ChessGame.TeamColor opponentColor = teamColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
+        Collection<ChessMove> myTeamMoves = getTeamPossibleMoves(teamColor);
+        for(ChessMove opponentMove : opponentMoves){
+            ChessPosition attackerTargetPosition = opponentMove.getEndPosition();
+            if(attackerTargetPosition.getRow() == kingPosition.getRow() && attackerTargetPosition.getColumn() == kingPosition.getColumn()){
+                for(ChessMove teamMove : myTeamMoves){
+                    ChessPosition defenderTargetPosition = teamMove.getEndPosition();
+                    if (defenderTargetPosition.getRow() == attackerTargetPosition.getRow() && attackerTargetPosition.getColumn() == defenderTargetPosition.getColumn()){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean kingHasValidMoves(ChessPosition kingPosition){
+        ChessPiece kingPiece = board.getPiece(kingPosition);
+        ChessGame.TeamColor teamColor = kingPiece.getTeamColor();
+        Collection<ChessMove> kingMoves = kingPiece.pieceMoves(board, kingPosition);
+        for(ChessMove move : kingMoves){
+           ChessPosition kingTargetPosition = move.getEndPosition();
+              ChessPiece targetPiece = board.getPiece(kingTargetPosition);
+                if(targetPiece == null && !isInCheck(teamColor)){
+                   return true;
+                }
+                if(targetPiece != null && targetPiece.getTeamColor() != teamColor && !isInCheck(teamColor)){
+                    return true;
+                }
+        }
+        return false;
+    }
+
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
