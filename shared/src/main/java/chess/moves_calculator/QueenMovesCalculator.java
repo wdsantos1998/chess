@@ -100,4 +100,7 @@ public class QueenMovesCalculator implements PieceMovesCalculator {
     public void setCapturedPiece(boolean capturedPiece) {
         this.capturedPiece = capturedPiece;
     }
+    public boolean isSlidingPiece() {
+        return true;
+    }
 }
