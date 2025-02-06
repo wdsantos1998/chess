@@ -1,7 +1,10 @@
 package chess;
 
+import chess.moves_calculator.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -13,10 +16,11 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor teamTurn;
-    private boolean isGameOver = false;
+    private boolean isGameOver;
 
     public ChessGame() {
         this.board = new ChessBoard();
+        setGameOver(false);
         this.board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
     }
@@ -63,14 +67,14 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece myPiece = board.getPiece(startPosition);
+        Collection<ChessMove> validMoves = new ArrayList<>();
         if (myPiece == null) {
             return null;
         }
         Collection<ChessMove> moves = myPiece.pieceMoves(this.board, startPosition);
-        Collection<ChessMove> validMoves = new ArrayList<>();
-        for(ChessMove move : moves){
-            if(isMoveValid(move)){
-                validMoves.add(move);
+        for (ChessMove move : moves) {
+            if (!isInCheck(myPiece.getTeamColor())) {
+//                validMoves.add(move);
             }
         }
         return validMoves;
@@ -149,10 +153,6 @@ public class ChessGame {
                     continue;
                 }
                 //I need and edge case to when the piece is the King
-
-//                if(piece.getPieceType() == ChessPiece.PieceType.KING){
-//                    getKingPossibleMoves(piece);
-//                }
                 moves.addAll(piece.pieceMoves(board, position));
             }
         }
@@ -170,7 +170,7 @@ public class ChessGame {
         //I need to check for:
         //1. If the king is in check (Done)
         //2. If the king has no legal moves (Done)
-        //3. No friendly pieces can block the check
+        //3. No friendly pieces can block the check (Done)
         //4. No friendly pieces can capture the attacking piece (Done)
         boolean inCheck = isInCheck(teamColor);
         if(!inCheck){
@@ -191,8 +191,57 @@ public class ChessGame {
     }
 
     private boolean friendlyPieceCanBlockAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
-
+        //1- Find out who is attacking the king
+        //2- Find out the attacker's route to the king
+        //3- Find out if any friendly piece can block the attacker's route
+        ChessMove attackerMove = null;
+        ChessGame.TeamColor opponentColor = teamColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
+        for(ChessMove move : opponentMoves) {
+            if (move.getEndPosition().equals(kingPosition)) {
+                attackerMove = move;
+                break;
+            }
+        }
+        if(attackerMove == null){
+            return false;
+        }
+        //Check if friendly piece can block the attacker
+        Collection<ChessMove> friendlyMoves = getTeamPossibleMoves(teamColor);
+        List<ChessPosition> routeToPiece = getAttackerRouteToPiece(attackerMove, kingPosition);
+        for(ChessPosition route : routeToPiece){
+            for(ChessMove friendlyMove : friendlyMoves){
+                if(route.equals(friendlyMove.getEndPosition())){
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    private List<ChessPosition> getAttackerRouteToPiece(ChessMove attackerMove, ChessPosition kingPosition){
+        List<ChessPosition> route = new ArrayList<>();
+        ChessBoard board = getBoard();
+        ChessPiece attackerPiece = board.getPiece(attackerMove.getStartPosition());
+        if(attackerPiece.getPieceType() == ChessPiece.PieceType.KNIGHT || attackerPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+            //Empty route array
+            return route;
+        }
+        ChessPosition attackerPosition = attackerMove.getStartPosition();
+
+        //Getting direction of movement
+        int directionRow = Integer.compare(kingPosition.getRow(), attackerPosition.getRow());
+        int directionColumn = Integer.compare(kingPosition.getColumn(), attackerPosition.getColumn());
+
+        int rowTowardsKing = attackerPosition.getRow() + directionRow;
+        int colTowardsKing = attackerPosition.getColumn() + directionColumn;
+
+        while(rowTowardsKing != kingPosition.getRow() && colTowardsKing != kingPosition.getColumn()){
+            route.add(new ChessPosition(rowTowardsKing, colTowardsKing));
+            rowTowardsKing += directionRow;
+            colTowardsKing += directionColumn;
+        }
+        return route;
     }
 
     private boolean friendlyPieceCanCaptureAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
@@ -240,10 +289,10 @@ public class ChessGame {
      */
 
     //If the king is not in check, but the player has no legal moves, then it's a stalemate.
-    public boolean isInStalemate(TeamColor teamColor) {
-        //I need to set a draw condition if the king is not in check but has no legal moves
-        throw new RuntimeException("Not implemented");
-    }
+//    public boolean isInStalemate(TeamColor teamColor) {
+//        //I need to set a draw condition if the king is not in check but has no legal moves
+//
+//    }
 
     /**
      * Sets this game's chessboard with a given board

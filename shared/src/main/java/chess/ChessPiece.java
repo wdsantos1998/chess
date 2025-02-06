@@ -83,6 +83,10 @@ public class ChessPiece {
         return pieceMovesCalculator.calculateMoves(board, myPosition);
     }
 
+    public boolean isSlidingPiece(){
+        return type == PieceType.BISHOP || type == PieceType.ROOK || type == PieceType.QUEEN;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
