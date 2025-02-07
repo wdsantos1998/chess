@@ -1,11 +1,6 @@
 package chess;
 
-import chess.moves_calculator.*;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -67,16 +62,15 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece myPiece = board.getPiece(startPosition);
+        ChessGame.TeamColor teamColor = myPiece.getTeamColor();
         Collection<ChessMove> validMoves = new ArrayList<>();
-        if (myPiece == null) {
-            return null;
-        }
         Collection<ChessMove> moves = myPiece.pieceMoves(this.board, startPosition);
+
         for (ChessMove move : moves) {
-            if (!isInCheck(myPiece.getTeamColor())) {
-//                validMoves.add(move);
+                if(!simulatePieceMovementAndCheck(move, teamColor)){
+                    validMoves.add(move);
+                }
             }
-        }
         return validMoves;
     }
 
@@ -91,8 +85,8 @@ public class ChessGame {
     private int[] getKingLocation(ChessGame.TeamColor teamColor) {
         ChessPiece.PieceType king = ChessPiece.PieceType.KING;
         int [] KingLocation = new int[2];
-        for(int i = 0; i < 8; i++){
-            for(int j = 0; j < 8; j++){
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
                 ChessPosition position = new ChessPosition(i,j);
                 ChessPiece piece = board.getPiece(position);
                 if(piece == null){
@@ -124,26 +118,28 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         int[] kingLocation = getKingLocation(teamColor);
+        ChessPosition kingPosition = new ChessPosition(kingLocation[0], kingLocation[1]);
         ChessGame.TeamColor opponentColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor, true);
         for(ChessMove move : opponentMoves){
-            if(move.getEndPosition().getRow() == kingLocation[0] && move.getEndPosition().getColumn() == kingLocation[1]){
+            if(move.getEndPosition().equals(kingPosition)){
                 return true;
             }
         }
         return false;
     }
 
+
     /**
      * Returns all possible moves for the opponent of the given team
-     *
+     *It does not consider if a move is valid or not
      * @param teamColor opponent's team color
      * @return A collection of all possible moves for the opponent
      */
-    private Collection<ChessMove> getTeamPossibleMoves(ChessGame.TeamColor teamColor){
+    private Collection<ChessMove> getTeamPossibleMoves(ChessGame.TeamColor teamColor , boolean returnKingMoves){
         Collection<ChessMove> moves = new ArrayList<>();
-        for(int i = 0; i < 8; i++){
-            for(int j = 0; j < 8; j++){
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
                 ChessPosition position = new ChessPosition(i,j);
                 ChessPiece piece = board.getPiece(position);
                 if(piece == null){
@@ -152,7 +148,9 @@ public class ChessGame {
                 if(piece.getTeamColor() != teamColor){
                     continue;
                 }
-                //I need and edge case to when the piece is the King
+                if (!returnKingMoves && piece.getPieceType() != ChessPiece.PieceType.KING){
+                    continue;
+                }
                 moves.addAll(piece.pieceMoves(board, position));
             }
         }
@@ -166,77 +164,87 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        //This function needs to call for game over if the king is in checkmate
-        //I need to check for:
-        //1. If the king is in check (Done)
-        //2. If the king has no legal moves (Done)
-        //3. No friendly pieces can block the check (Done)
-        //4. No friendly pieces can capture the attacking piece (Done)
         boolean inCheck = isInCheck(teamColor);
         if(!inCheck){
             return false;
         }
         int[] kingLocation = getKingLocation(teamColor);
         ChessPosition kingPosition = new ChessPosition(kingLocation[0], kingLocation[1]);
-        if(kingHasValidMoves(kingPosition)){
+        boolean validMovesForKing = kingHasValidMoves(kingPosition);
+        if(validMovesForKing){
             return false;
         }
-        if(friendlyPieceCanCaptureAttacker(kingPosition,teamColor)){
+        boolean friendCanCaptureEnemy = friendlyPieceCanCaptureAttacker(kingPosition,teamColor);
+        if(friendCanCaptureEnemy){
             return false;
         }
-        if(friendlyPieceCanBlockAttacker(kingPosition,teamColor)){
+        boolean friendCanBlockAttacker = friendlyPieceCanBlockAttacker(kingPosition,teamColor);
+        if(friendCanBlockAttacker){
             return false;
         }
         return true;
     }
 
-    private boolean friendlyPieceCanBlockAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
-        //1- Find out who is attacking the king
-        //2- Find out the attacker's route to the king
-        //3- Find out if any friendly piece can block the attacker's route
-        ChessMove attackerMove = null;
-        ChessGame.TeamColor opponentColor = teamColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
-        for(ChessMove move : opponentMoves) {
+    private boolean friendlyPieceCanBlockAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor) {
+        ChessGame.TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor, false);
+
+        List<ChessMove> attackerMoves = new ArrayList<>();
+        for (ChessMove move : opponentMoves) {
             if (move.getEndPosition().equals(kingPosition)) {
-                attackerMove = move;
-                break;
+                attackerMoves.add(move);
             }
         }
-        if(attackerMove == null){
+        if (attackerMoves.isEmpty()) {
             return false;
         }
-        //Check if friendly piece can block the attacker
-        Collection<ChessMove> friendlyMoves = getTeamPossibleMoves(teamColor);
-        List<ChessPosition> routeToPiece = getAttackerRouteToPiece(attackerMove, kingPosition);
-        for(ChessPosition route : routeToPiece){
-            for(ChessMove friendlyMove : friendlyMoves){
-                if(route.equals(friendlyMove.getEndPosition())){
-                    return true;
-                }
+
+        List<ChessPosition> routeToPiece = new ArrayList<>();
+        for (ChessMove attackerMove : attackerMoves) {
+            ChessPiece attackerPiece = board.getPiece(attackerMove.getStartPosition());
+            if (attackerPiece.isSlidingPiece()) {
+                routeToPiece.addAll(getAttackerRouteToPiece(attackerMove, kingPosition));
             }
         }
+        if (routeToPiece.isEmpty()) {
+            return false;
+        }
+
+        Collection<ChessMove> friendlyMoves = getTeamPossibleMoves(teamColor, false);
+
+        HashSet<ChessPosition> routeSet = new HashSet<>(routeToPiece);
+
+        for (ChessMove friendlyMove : friendlyMoves) {
+            if (routeSet.contains(friendlyMove.getEndPosition())) {
+                return true;
+            }
+        }
+
         return false;
     }
 
-    private List<ChessPosition> getAttackerRouteToPiece(ChessMove attackerMove, ChessPosition kingPosition){
+    private List<ChessPosition> getAttackerRouteToPiece(ChessMove attackerMove, ChessPosition pieceUnderAttack){
+        //This function was built for the purpose of finding the route of the attacker to the king,
+        // but can be used to track the route of any piece to another piece
+
         List<ChessPosition> route = new ArrayList<>();
         ChessBoard board = getBoard();
         ChessPiece attackerPiece = board.getPiece(attackerMove.getStartPosition());
         if(attackerPiece.getPieceType() == ChessPiece.PieceType.KNIGHT || attackerPiece.getPieceType() == ChessPiece.PieceType.PAWN){
-            //Empty route array
+            //These pieces cannot be blocked
             return route;
         }
         ChessPosition attackerPosition = attackerMove.getStartPosition();
 
         //Getting direction of movement
-        int directionRow = Integer.compare(kingPosition.getRow(), attackerPosition.getRow());
-        int directionColumn = Integer.compare(kingPosition.getColumn(), attackerPosition.getColumn());
+        int directionRow = Integer.compare(pieceUnderAttack.getRow(), attackerPosition.getRow());
+        int directionColumn = Integer.compare(pieceUnderAttack.getColumn(), attackerPosition.getColumn());
 
         int rowTowardsKing = attackerPosition.getRow() + directionRow;
         int colTowardsKing = attackerPosition.getColumn() + directionColumn;
 
-        while(rowTowardsKing != kingPosition.getRow() && colTowardsKing != kingPosition.getColumn()){
+        while(rowTowardsKing != pieceUnderAttack.getRow() && colTowardsKing != pieceUnderAttack.getColumn()){
             route.add(new ChessPosition(rowTowardsKing, colTowardsKing));
             rowTowardsKing += directionRow;
             colTowardsKing += directionColumn;
@@ -245,38 +253,58 @@ public class ChessGame {
     }
 
     private boolean friendlyPieceCanCaptureAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
-        ChessGame.TeamColor opponentColor = teamColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor);
-        Collection<ChessMove> myTeamMoves = getTeamPossibleMoves(teamColor);
+        //I need to account for more than one attacker.
+        ChessGame.TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        //Including King for the purpose of checking if it can capture the attacker
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor,true);
+        Collection<ChessMove> myTeamMoves = getTeamPossibleMoves(teamColor,false);
+        HashSet<ChessPosition> attackerPositions = new HashSet<>();
+        HashSet<ChessPosition> defenderPositions = new HashSet<>();
         for(ChessMove opponentMove : opponentMoves){
             ChessPosition attackerTargetPosition = opponentMove.getEndPosition();
-            if(attackerTargetPosition.getRow() == kingPosition.getRow() && attackerTargetPosition.getColumn() == kingPosition.getColumn()){
+            ChessPosition attackerInitialPosition = opponentMove.getStartPosition();
+            if(attackerTargetPosition.equals(kingPosition)){
+                attackerPositions.add(attackerInitialPosition);
                 for(ChessMove teamMove : myTeamMoves){
                     ChessPosition defenderTargetPosition = teamMove.getEndPosition();
-                    if (defenderTargetPosition.getRow() == attackerTargetPosition.getRow() && attackerTargetPosition.getColumn() == defenderTargetPosition.getColumn()){
-                        return true;
+                    if (defenderTargetPosition.equals(attackerInitialPosition)){
+                        defenderPositions.add(defenderTargetPosition);
                     }
                 }
             }
         }
-        return false;
+        if (attackerPositions.size() > 1 && !defenderPositions.containsAll(attackerPositions)) {
+            return false;
+        }
+        return defenderPositions.containsAll(attackerPositions) || attackerPositions.isEmpty() ;
     }
 
+    //Improve this function
     private boolean kingHasValidMoves(ChessPosition kingPosition){
         ChessPiece kingPiece = board.getPiece(kingPosition);
         ChessGame.TeamColor teamColor = kingPiece.getTeamColor();
         Collection<ChessMove> kingMoves = kingPiece.pieceMoves(board, kingPosition);
         for(ChessMove move : kingMoves){
-           ChessPosition kingTargetPosition = move.getEndPosition();
-              ChessPiece targetPiece = board.getPiece(kingTargetPosition);
-                if(targetPiece == null && !isInCheck(teamColor)){
-                   return true;
-                }
-                if(targetPiece != null && targetPiece.getTeamColor() != teamColor && !isInCheck(teamColor)){
-                    return true;
-                }
+            if(!simulatePieceMovementAndCheck(move, teamColor)){
+                return true;
+            }
         }
         return false;
+    }
+
+    public boolean simulatePieceMovementAndCheck(ChessMove move, TeamColor teamColor) {
+        ChessPiece pieceOnTargetPosition = board.getPiece(move.getEndPosition());
+        ChessPiece pieceAtStartingPosition = board.getPiece(move.getStartPosition());
+
+        board.addPiece(move.getEndPosition(), pieceAtStartingPosition);
+        board.addPiece(move.getStartPosition(), null);
+
+        boolean isKingAtRisk = isInCheck(teamColor);
+
+        board.addPiece(move.getStartPosition(), pieceAtStartingPosition);
+        board.addPiece(move.getEndPosition(), pieceOnTargetPosition);
+
+        return isKingAtRisk;
     }
 
 
@@ -289,10 +317,18 @@ public class ChessGame {
      */
 
     //If the king is not in check, but the player has no legal moves, then it's a stalemate.
-//    public boolean isInStalemate(TeamColor teamColor) {
-//        //I need to set a draw condition if the king is not in check but has no legal moves
-//
-//    }
+    public boolean isInStalemate(TeamColor teamColor) {
+        if(isInCheck(teamColor)){
+            return false;
+        }
+        Collection<ChessMove> teamMoves = getTeamPossibleMoves(teamColor,true);
+        for(ChessMove move: teamMoves){
+            if(!simulatePieceMovementAndCheck(move, teamColor)){
+                return false;
+            }
+        }
+            return true;
+    }
 
     /**
      * Sets this game's chessboard with a given board
