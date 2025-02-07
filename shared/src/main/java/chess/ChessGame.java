@@ -170,16 +170,13 @@ public class ChessGame {
         }
         int[] kingLocation = getKingLocation(teamColor);
         ChessPosition kingPosition = new ChessPosition(kingLocation[0], kingLocation[1]);
-        boolean validMovesForKing = kingHasValidMoves(kingPosition);
-        if(validMovesForKing){
+        if(kingHasValidMoves(kingPosition)){
             return false;
         }
-        boolean friendCanCaptureEnemy = friendlyPieceCanCaptureAttacker(kingPosition,teamColor);
-        if(friendCanCaptureEnemy){
+        if(friendlyPieceCanCaptureAttacker(kingPosition,teamColor)){
             return false;
         }
-        boolean friendCanBlockAttacker = friendlyPieceCanBlockAttacker(kingPosition,teamColor);
-        if(friendCanBlockAttacker){
+        if(friendlyPieceCanBlockAttacker(kingPosition,teamColor)){
             return false;
         }
         return true;
@@ -252,34 +249,37 @@ public class ChessGame {
         return route;
     }
 
-    private boolean friendlyPieceCanCaptureAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor){
-        //I need to account for more than one attacker.
+    private boolean friendlyPieceCanCaptureAttacker(ChessPosition kingPosition, ChessGame.TeamColor teamColor) {
         ChessGame.TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-        //Including King for the purpose of checking if it can capture the attacker
-        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor,true);
-        Collection<ChessMove> myTeamMoves = getTeamPossibleMoves(teamColor,false);
+        Collection<ChessMove> opponentMoves = getTeamPossibleMoves(opponentColor, true);
+        Collection<ChessMove> myTeamMoves = getTeamPossibleMoves(teamColor, true);
+
         HashSet<ChessPosition> attackerPositions = new HashSet<>();
-        HashSet<ChessPosition> defenderPositions = new HashSet<>();
-        for(ChessMove opponentMove : opponentMoves){
-            ChessPosition attackerTargetPosition = opponentMove.getEndPosition();
-            ChessPosition attackerInitialPosition = opponentMove.getStartPosition();
-            if(attackerTargetPosition.equals(kingPosition)){
-                attackerPositions.add(attackerInitialPosition);
-                for(ChessMove teamMove : myTeamMoves){
-                    ChessPosition defenderTargetPosition = teamMove.getEndPosition();
-                    if (defenderTargetPosition.equals(attackerInitialPosition)){
-                        defenderPositions.add(defenderTargetPosition);
-                    }
-                }
+        HashSet<ChessMove> defenderMoves = new HashSet<>();
+
+        for (ChessMove opponentMove : opponentMoves) {
+            if (opponentMove.getEndPosition().equals(kingPosition)) {
+                attackerPositions.add(opponentMove.getStartPosition());
             }
         }
-        if (attackerPositions.size() > 1 && !defenderPositions.containsAll(attackerPositions)) {
-            return false;
+
+        // Identify all moves that could capture an attacker
+        for (ChessMove teamMove : myTeamMoves) {
+            if (attackerPositions.contains(teamMove.getEndPosition())) {
+                defenderMoves.add(teamMove);
+            }
         }
-        return defenderPositions.containsAll(attackerPositions) || attackerPositions.isEmpty() ;
+
+        for (ChessMove teamMove : defenderMoves) {
+            if (!simulatePieceMovementAndCheck(teamMove, teamColor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    //Improve this function
+
+
     private boolean kingHasValidMoves(ChessPosition kingPosition){
         ChessPiece kingPiece = board.getPiece(kingPosition);
         ChessGame.TeamColor teamColor = kingPiece.getTeamColor();
