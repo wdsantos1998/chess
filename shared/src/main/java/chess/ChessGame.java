@@ -112,8 +112,8 @@ public class ChessGame {
             throw new InvalidMoveException("Game over!");
         }
         ChessPiece myPiece = board.getPiece(move.getStartPosition());
-        if (myPiece == null){
-            throw new InvalidMoveException("No piece at the start position.");
+        if (myPiece == null || myPiece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("No piece at the starting position or attempting to play out of turn.");
         }
 
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
