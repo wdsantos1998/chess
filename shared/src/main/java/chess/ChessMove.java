@@ -53,16 +53,10 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        System.out.println("chessMove: " + chessMove.toString());
         boolean startPosition = this.startPosition.equals(chessMove.startPosition);
-        System.out.println("startPosition: " + startPosition);
         boolean endPosition = this.endPosition.equals(chessMove.endPosition);
-        System.out.println("endPosition: " + endPosition);
         boolean promotionPiece = Objects.equals(this.promotionPiece, chessMove.promotionPiece);
-        System.out.println("promotionPiece: " + promotionPiece);
-        boolean returnValue = startPosition && endPosition && promotionPiece;
-        System.out.println("returnValue: " + returnValue);
-        return returnValue;
+        return startPosition && endPosition && promotionPiece;
     }
 
     @Override
