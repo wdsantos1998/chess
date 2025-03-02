@@ -2,6 +2,7 @@ package model;
 
 import chess.ChessGame;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static java.lang.Integer.parseInt;
@@ -52,4 +53,20 @@ public class Game {
         return game;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Game game1 = (Game) o;
+        return gameId == game1.gameId && Objects.equals(whiteUsername, game1.whiteUsername) && Objects.equals(blackUsername, game1.blackUsername) && Objects.equals(gameName, game1.gameName) && Objects.equals(game, game1.game);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameId, whiteUsername, blackUsername, gameName, game);
+    }
 }
