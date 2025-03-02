@@ -68,9 +68,9 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public boolean updateGame(Game game) throws DataAccessException {
-        Game gameOldVersion = game;
+        Game gameOldVersion = gameDataMap.get(game.getGameId());
         gameDataMap.replace(game.getGameId(), game);
-        if(gameDataMap.containsValue(gameOldVersion)){
+        if(gameOldVersion.equals(gameDataMap.get(game.getGameId()))){
             throw new DataAccessException("Error in updating game settings. Please try again.");
         }
         return true;

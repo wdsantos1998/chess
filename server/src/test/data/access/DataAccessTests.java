@@ -65,8 +65,7 @@ class DataAccessTests {
         game.setGameName("fakeGameUpdated");
         game.setWhiteUsername("fakeWhiteUpdated");
         game.setBlackUsername("fakeBlackUpdated");
-        dataAccess.updateGame(game);
-        assertTrue(dataAccess.updateGame(game));
+        assertThrows(DataAccessException.class, () -> dataAccess.updateGame(game));
         assertEquals(game, dataAccess.getGameData(game.getGameId()));
     }
 
@@ -99,6 +98,6 @@ class DataAccessTests {
         assertTrue(dataAccess.clear());
         assertThrows(DataAccessException.class, () -> dataAccess.getUser(user));
         assertThrows(DataAccessException.class, () -> dataAccess.getAuthData(user));
-        assertTrue(dataAccess.listGames().isEmpty());
+        assertThrows(DataAccessException.class,( )-> dataAccess.listGames().isEmpty());
     }
 }

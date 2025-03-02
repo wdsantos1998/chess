@@ -16,12 +16,17 @@ public class Game {
 
 
     public Game(String whiteUsername, String blackUsername, String gameName) {
-        this.gameId = parseInt(UUID.randomUUID().toString());
+        this.gameId = generateUniqueId();
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.gameName = gameName;
         this.game = new ChessGame();
     }
+
+    private int generateUniqueId() {
+        return UUID.randomUUID().hashCode();
+    }
+
     public int getGameId() {
         return gameId;
     }
