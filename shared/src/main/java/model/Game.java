@@ -8,7 +8,7 @@ import java.util.UUID;
 import static java.lang.Integer.parseInt;
 
 public class Game {
-    private int gameId;
+    private final int  gameId;
     private String whiteUsername;
     private String blackUsername;
     private String gameName;
@@ -28,6 +28,10 @@ public class Game {
 
     public String getGameName() {
         return gameName;
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
     }
 
     public String getBlackUsername() {
