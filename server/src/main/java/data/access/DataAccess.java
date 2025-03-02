@@ -1,4 +1,4 @@
-package dataaccess;
+package data.access;
 
 import model.Game;
 import model.User;
@@ -73,6 +73,14 @@ public interface DataAccess {
      * @throws DataAccessException in case of any error
      */
     boolean createGame(Game game ) throws DataAccessException;
+
+
+    /**
+     *Function to return specific game based on gameId
+     * @return game
+     * @throws DataAccessException in case of any error
+     */
+    Game getGameData(int gameId) throws DataAccessException;
 
     /**
      *Function to return list of games in memory
