@@ -2,9 +2,15 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
+import data.access.DataAccessException;
+import data.access.DataAccessExceptionHTTP;
 import model.User;
 import model.authData;
 import service.AppService;
+
+import java.util.Map;
 
 import static spark.Spark.delete;
 import static spark.Spark.post;
@@ -20,15 +26,23 @@ public class AppHandler {
     public void startRoutes() {
         post("/user", (req, res) -> {
             try {
-                AppHandler handler = new AppHandler(appService);
-                User userData = gson.fromJson(String.valueOf(req.body()), User.class);
-                authData response =  handler.appService.register(userData);
-                res.status(200);
-                return gson.toJson(response);
-            }
-            catch (Exception e){
-                res.status(500);
-                return gson.toJson(e.getMessage());
+                User userData = gson.fromJson(req.body(), User.class);
+                try {
+                    authData response = appService.register(userData);
+                    res.status(200);
+                    return gson.toJson(response);
+                } catch (DataAccessExceptionHTTP e) {
+                    res.status(e.getStatusCode());
+                    return gson.toJson(Map.of(
+                            "message", e.getMessage()
+                    ));
+                }
+            } catch (JsonSyntaxException e) {
+                res.status(400);
+                return gson.toJson(Map.of(
+                        "error", "Invalid JSON",
+                        "message", "Malformed request body"
+                ));
             }
         });
         delete("/db", (req, res) -> {

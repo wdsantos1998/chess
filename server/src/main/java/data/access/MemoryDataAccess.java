@@ -13,10 +13,7 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public boolean addUser(User user) throws DataAccessExceptionHTTP {
         userDataMap.put(user.getUsername(), user);
-        if(!userDataMap.containsValue(user)){
-            throw new DataAccessExceptionHTTP(500,"Error in adding user. Please try again.");
-        }
-        return true;
+        return userDataMap.containsValue(user);
     }
 
     @Override
