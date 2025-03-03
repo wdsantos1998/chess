@@ -1,7 +1,8 @@
 package data.access;
-import data.access.DataAccessException;
+import data.access.DataAccessExceptionHTTP;
 import model.Game;
 import model.User;
+import model.authData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -20,14 +21,14 @@ class DataAccessTests {
     }
 
     @Test
-    void testAddUser() throws DataAccessException {
+    void testAddUser() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         assertTrue(dataAccess.addUser(user));
         assertEquals(user, dataAccess.getUser(user));
     }
 
     @Test
-    void testGetUser() throws DataAccessException {
+    void testGetUser() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
         assertEquals(user, dataAccess.getUser(user));
@@ -37,47 +38,47 @@ class DataAccessTests {
     void testGetUserNotFound() {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         Executable executable = () -> dataAccess.getUser(user);
-        assertThrows(DataAccessException.class, executable);
+        assertThrows(DataAccessExceptionHTTP.class, executable);
     }
 
     @Test
-    void testCreateAuthData() throws DataAccessException {
+    void testCreateAuthData() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        assertTrue(dataAccess.createAuthData(user));
-        assertNotNull(dataAccess.getAuthData(user));
+        authData token = dataAccess.createAuthData(user);
+        assertEquals(token,dataAccess.getAuthData(user));
     }
 
     @Test
-    void testDeleteAuthToken() throws DataAccessException {
+    void testDeleteAuthToken() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
         dataAccess.createAuthData(user);
         assertTrue(dataAccess.deleteAuthToken(user));
         Executable executable = () -> dataAccess.getAuthData(user);
-        assertThrows(DataAccessException.class, executable);
+        assertThrows(DataAccessExceptionHTTP.class, executable);
     }
 
     @Test
-    void testUpdateGame() throws DataAccessException {
+    void testUpdateGame() throws DataAccessExceptionHTTP {
         Game game = new Game("fakeWhite", "fakeBlack","fakeGame");
         dataAccess.createGame(game);
         game.setGameName("fakeGameUpdated");
         game.setWhiteUsername("fakeWhiteUpdated");
         game.setBlackUsername("fakeBlackUpdated");
-        assertThrows(DataAccessException.class, () -> dataAccess.updateGame(game));
+        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.updateGame(game));
         assertEquals(game, dataAccess.getGameData(game.getGameId()));
     }
 
     @Test
-    void testCreateGame() throws DataAccessException {
+    void testCreateGame() throws DataAccessExceptionHTTP {
         Game game = new Game("fakeWhite", "fakeBlack", "fakeGame");
-        assertTrue(dataAccess.createGame(game));
-        assertEquals(game, dataAccess.listGames().get(0));
+        Game gameCreated = dataAccess.createGame(game);
+        assertEquals(gameCreated, dataAccess.listGames().get(0));
     }
 
     @Test
-    void testListGames() throws DataAccessException {
+    void testListGames() throws DataAccessExceptionHTTP {
         Game game1 = new Game("fakeWhite", "fakeBlack", "fakeGame1");
         Game game2 = new Game("fakeWhite", "fakeBlack", "fakeGame2");
         dataAccess.createGame(game1);
@@ -89,15 +90,15 @@ class DataAccessTests {
     }
 
     @Test
-    void testClear() throws DataAccessException {
+    void testClear() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
         dataAccess.createAuthData(user);
         Game game = new Game("fakeWhite", "fakeBlack", "fakeGame1");
         dataAccess.createGame(game);
         assertTrue(dataAccess.clear());
-        assertThrows(DataAccessException.class, () -> dataAccess.getUser(user));
-        assertThrows(DataAccessException.class, () -> dataAccess.getAuthData(user));
-        assertThrows(DataAccessException.class,( )-> dataAccess.listGames().isEmpty());
+        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getUser(user));
+        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getAuthData(user));
+        assertThrows(DataAccessExceptionHTTP.class,( )-> dataAccess.listGames().isEmpty());
     }
 }

@@ -11,105 +11,104 @@ public class MemoryDataAccess implements DataAccess{
     Map<String, authData> authDataMap = new HashMap<>();
     Map<Integer, Game> gameDataMap = new HashMap<>();
     @Override
-    public boolean addUser(User user) throws DataAccessException {
+    public boolean addUser(User user) throws DataAccessExceptionHTTP {
         userDataMap.put(user.getUsername(), user);
         if(!userDataMap.containsValue(user)){
-            throw new DataAccessException("Error in adding user. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in adding user. Please try again.");
         }
         return true;
     }
 
     @Override
-    public User getUser(User user) throws DataAccessException {
+    public User getUser(User user) throws DataAccessExceptionHTTP {
         User memoryUser = userDataMap.get(user.getUsername());
         if(memoryUser == null){
-            throw new DataAccessException("User not found. Please try again.");
+            throw new DataAccessExceptionHTTP(400,"User not found. Please try again.");
         }
         return memoryUser;
     }
 
     @Override
-    public User getUser(authData authData) throws DataAccessException {
+    public User getUser(authData authData) throws DataAccessExceptionHTTP {
         User memoryUser = userDataMap.get(authData.getUsername());
         if(memoryUser == null){
-            throw new DataAccessException("User not found. Please try again.");
+            throw new DataAccessExceptionHTTP(400,"User not found. Please try again.");
         }
         return memoryUser;
     }
 
     @Override
-    public authData getAuthData(User user) throws DataAccessException {
+    public authData getAuthData(User user) throws DataAccessExceptionHTTP {
         authData memoryAuthToken = authDataMap.get(user.getUsername());
         if(memoryAuthToken == null){
-            throw new DataAccessException("Token not found. Please try again.");
+            throw new DataAccessExceptionHTTP(400,"Token not found. Please try again.");
         }
         return memoryAuthToken;
     }
 
     @Override
-    public boolean createAuthData(User user) throws DataAccessException {
-        String randomToken = UUID.randomUUID().toString();
-        authData newAuthData =  new authData(randomToken, user.getUsername());
+    public authData createAuthData(User user) throws DataAccessExceptionHTTP {
+        authData newAuthData =  new authData(user.getUsername());
         authDataMap.put(user.getUsername(),newAuthData);
         if(!authDataMap.containsValue(newAuthData)){
-            throw new DataAccessException("Error in creating new token. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in creating new token. Please try again.");
         }
-        return true;
+        return newAuthData;
     }
 
     @Override
-    public boolean deleteAuthToken(User user) throws DataAccessException {
+    public boolean deleteAuthToken(User user) throws DataAccessExceptionHTTP {
         authDataMap.remove(user.getUsername());
         if(authDataMap.containsKey(user.getUsername())){
-            throw new DataAccessException("Error in deleting token. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in deleting token. Please try again.");
         }
         return true;
     }
 
     @Override
-    public boolean updateGame(Game game) throws DataAccessException {
+    public boolean updateGame(Game game) throws DataAccessExceptionHTTP {
         Game gameOldVersion = gameDataMap.get(game.getGameId());
         gameDataMap.replace(game.getGameId(), game);
         if(gameOldVersion.equals(gameDataMap.get(game.getGameId()))){
-            throw new DataAccessException("Error in updating game settings. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in updating game settings. Please try again.");
         }
         return true;
     }
 
     @Override
-    public boolean createGame(Game game) throws DataAccessException {
+    public Game createGame(Game game) throws DataAccessExceptionHTTP {
         gameDataMap.put(game.getGameId(), game);
         if(!gameDataMap.containsValue(game)){
-            throw new DataAccessException("Error in creating new game. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in creating new game. Please try again.");
         }
-        return true;
+        return game;
     }
 
     @Override
-    public Game getGameData(int gameId) throws DataAccessException {
+    public Game getGameData(int gameId) throws DataAccessExceptionHTTP {
         Game memoryGame = gameDataMap.get(gameId);
         if(memoryGame == null){
-            throw new DataAccessException("Error in returning game. Game not found. Please try again.");
+            throw new DataAccessExceptionHTTP(400,"Error in returning game. Game not found. Please try again.");
         }
         return memoryGame;
     }
 
     @Override
-    public List<Game> listGames() throws DataAccessException {
+    public List<Game> listGames() throws DataAccessExceptionHTTP {
         List<Game> listOfGames = new ArrayList<>(gameDataMap.values());
         if(listOfGames.isEmpty()){
-            throw new DataAccessException("Error in returning list of games. List is empty. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in returning list of games. List is empty. Please try again.");
         }
         return listOfGames;
     }
 
     @Override
-    public boolean clear() throws DataAccessException {
+    public boolean clear() throws DataAccessExceptionHTTP {
         userDataMap.clear();
         authDataMap.clear();
         gameDataMap.clear();
         if (!userDataMap.isEmpty() || !authDataMap.isEmpty() || !gameDataMap.isEmpty()) {
-            throw new DataAccessException("Error in clearing memory. Please try again.");
+            throw new DataAccessExceptionHTTP(500,"Error in clearing memory. Please try again.");
         }
         return true;
     }
