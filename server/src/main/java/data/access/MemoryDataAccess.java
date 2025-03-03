@@ -21,20 +21,12 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public User getUser(User user) throws DataAccessExceptionHTTP {
-        User memoryUser = userDataMap.get(user.getUsername());
-        if(memoryUser == null){
-            throw new DataAccessExceptionHTTP(400,"User not found. Please try again.");
-        }
-        return memoryUser;
+        return userDataMap.get(user.getUsername());
     }
 
     @Override
     public User getUser(authData authData) throws DataAccessExceptionHTTP {
-        User memoryUser = userDataMap.get(authData.getUsername());
-        if(memoryUser == null){
-            throw new DataAccessExceptionHTTP(400,"User not found. Please try again.");
-        }
-        return memoryUser;
+        return userDataMap.get(authData.getUsername());
     }
 
     @Override
