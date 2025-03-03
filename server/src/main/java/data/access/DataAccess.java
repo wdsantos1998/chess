@@ -18,19 +18,11 @@ public interface DataAccess {
 
     /**
      * Function user to get user information
-     * @param user of type User
+     * @param username of type String
      * @return user associated to information given.
      * @throws DataAccessExceptionHTTP in case of any errors
      */
-    User getUser(User user) throws DataAccessExceptionHTTP;
-
-    /**
-     * Function user to return user based on authData information
-     * @param authData of type authData
-     * @return a user based on the authData information.
-     * @throws DataAccessExceptionHTTP in case of any error
-     */
-    User getUser(authData authData) throws DataAccessExceptionHTTP;
+    User getUser(String username) throws DataAccessExceptionHTTP;
 
     /**
      * Function user to return authData from a user

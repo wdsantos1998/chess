@@ -17,13 +17,8 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public User getUser(User user) throws DataAccessExceptionHTTP {
-        return userDataMap.get(user.getUsername());
-    }
-
-    @Override
-    public User getUser(authData authData) throws DataAccessExceptionHTTP {
-        return userDataMap.get(authData.getUsername());
+    public User getUser(String username) throws DataAccessExceptionHTTP {
+        return userDataMap.get(username);
     }
 
     @Override

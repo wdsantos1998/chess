@@ -24,20 +24,20 @@ class DataAccessTests {
     void testAddUser() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         assertTrue(dataAccess.addUser(user));
-        assertEquals(user, dataAccess.getUser(user));
+        assertEquals(user, dataAccess.getUser(user.getUsername()));
     }
 
     @Test
     void testGetUser() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        assertEquals(user, dataAccess.getUser(user));
+        assertEquals(user, dataAccess.getUser(user.getUsername()));
     }
 
     @Test
     void testGetUserNotFound() {
         User user = new User("fakeUser", "password", "fake@gmail.com");
-        Executable executable = () -> dataAccess.getUser(user);
+        Executable executable = () -> dataAccess.getUser(user.getUsername());
         assertThrows(DataAccessExceptionHTTP.class, executable);
     }
 
@@ -97,7 +97,7 @@ class DataAccessTests {
         Game game = new Game("fakeWhite", "fakeBlack", "fakeGame1");
         dataAccess.createGame(game);
         assertTrue(dataAccess.clear());
-        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getUser(user));
+        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getUser(user.getUsername()));
         assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getAuthData(user));
         assertThrows(DataAccessExceptionHTTP.class,( )-> dataAccess.listGames().isEmpty());
     }
