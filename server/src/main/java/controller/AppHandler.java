@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
+import model.LoginRequest;
 import model.User;
 import model.authData;
 import service.AppService;
@@ -42,6 +43,19 @@ public class AppHandler {
                 return gson.toJson(Map.of(
                         "error", "Invalid JSON",
                         "message", "Malformed request body"
+                ));
+            }
+        });
+        post("/session", (req, res) -> {
+            LoginRequest loginRequestData = gson.fromJson(req.body(), LoginRequest.class);
+            try {
+                authData response = appService.login(loginRequestData);
+                res.status(200);
+                return gson.toJson(response);
+            } catch (DataAccessExceptionHTTP e) {
+                res.status(e.getStatusCode());
+                return gson.toJson(Map.of(
+                        "message", e.getMessage()
                 ));
             }
         });
