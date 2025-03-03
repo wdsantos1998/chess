@@ -18,4 +18,12 @@ public class authData {
     public String getUsername() {
         return username;
     }
+
+    @Override
+    public String toString() {
+        return "authData{" +
+                "authToken='" + authToken + '\'' +
+                ", username='" + username + '\'' +
+                '}';
+    }
 }
