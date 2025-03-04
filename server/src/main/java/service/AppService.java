@@ -60,6 +60,7 @@ public class AppService {
             }
             boolean isTokenValid = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
             if (!isTokenValid) {
+                System.out.println("I am sending and unauthorized error for this request "+gameRequest.toString());
                 throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
             }
             return dataAccess.createGame(new Game(null, null, gameRequest.getGameName()));
@@ -74,6 +75,7 @@ public class AppService {
         try{
             boolean isTokenValid = dataAccess.isValidAuthToken(joinGameRequestData.getAuthToken());
             if(!isTokenValid){
+                System.out.println("I am getting an unauthorized error");
                 throw new DataAccessExceptionHTTP(401,"Error: unauthorized");
             }
             Game gameData = dataAccess.getGameData(joinGameRequestData.getGameId());

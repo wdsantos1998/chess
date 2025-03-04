@@ -30,7 +30,7 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public boolean isValidAuthToken(String authToken) throws DataAccessExceptionHTTP {
-        return authDataMap.get(authToken) != null && authDataMap.get(authToken).getAuthToken().equals(authToken);
+        return authDataMap.get(authToken) != null && authDataMap.get(authToken).getAuthToken().equalsIgnoreCase(authToken);
     }
 
     @Override
