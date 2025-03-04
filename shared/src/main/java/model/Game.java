@@ -24,7 +24,7 @@ public class Game {
     }
 
     private int generateUniqueId() {
-        return UUID.randomUUID().hashCode();
+        return Math.abs(UUID.randomUUID().hashCode());
     }
 
     public int getGameId() {

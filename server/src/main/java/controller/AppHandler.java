@@ -64,7 +64,26 @@ public class AppHandler {
             try {
                 Game response = appService.createGame(gameRequest);
                 res.status(200);
+                System.out.println("Game id in create game "+response.getGameId());
                 return gson.toJson(Map.of("gameID", response.getGameId()));
+            } catch (DataAccessExceptionHTTP e) {
+                res.status(e.getStatusCode());
+                return gson.toJson(Map.of(
+                        "message", e.getMessage()
+                ));
+            }
+        });
+        delete("/session", (req, res) -> {
+            System.out.println("Calling logout API");
+            try {
+                String authToken = req.headers("authorization");
+                if(authToken == null){
+                    throw new DataAccessExceptionHTTP(400, "Error: bad request");
+                }
+                appService.logout(req.headers("authorization"));
+                res.status(200);
+                res.type("application/json");
+                return gson.toJson(new Object());
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
                 return gson.toJson(Map.of(
@@ -74,12 +93,17 @@ public class AppHandler {
         });
         delete("/db", (req, res) -> {
             try {
-                AppHandler handler = new AppHandler(appService);
-                handler.appService.clearApplication();
-                res.status(200);
-                res.type("application/json");
-                return gson.toJson(new Object());
-            } catch (Exception e) {
+                try {
+                    appService.clearApplication();
+                    res.status(200);
+                    res.type("application/json");
+                    return gson.toJson(new Object());
+                } catch (DataAccessExceptionHTTP e) {
+                    res.status(e.getStatusCode());
+                    return gson.toJson(e.getMessage());
+                }
+            }
+            catch (Exception e){
                 res.status(500);
                 return gson.toJson(e.getMessage());
             }
