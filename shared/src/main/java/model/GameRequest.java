@@ -17,4 +17,11 @@ public class GameRequest {
         return authToken;
     }
 
+    @Override
+    public String toString() {
+        return "GameRequest{" +
+                "gameName='" + gameName + '\'' +
+                ", authToken='" + authToken + '\'' +
+                '}';
+    }
 }
