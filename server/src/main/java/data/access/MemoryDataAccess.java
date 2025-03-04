@@ -3,6 +3,7 @@ package data.access;
 import model.Game;
 import model.User;
 import model.authData;
+import org.eclipse.jetty.util.StringUtil;
 
 import java.util.*;
 
@@ -22,18 +23,14 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public authData getAuthData(User user) throws DataAccessExceptionHTTP {
-        authData memoryAuthToken = authDataMap.get(user.getUsername());
-        if(memoryAuthToken == null){
-            throw new DataAccessExceptionHTTP(400,"Token not found. Please try again.");
-        }
-        return memoryAuthToken;
+    public authData getAuthData(String username) throws DataAccessExceptionHTTP {
+        return authDataMap.get(username);
     }
 
     @Override
-    public authData createAuthData(User user) throws DataAccessExceptionHTTP {
-        authData newAuthData =  new authData(user.getUsername());
-        authDataMap.put(user.getUsername(),newAuthData);
+    public authData createAuthData(String username) throws DataAccessExceptionHTTP {
+        authData newAuthData =  new authData(username);
+        authDataMap.put(username,newAuthData);
         if(!authDataMap.containsValue(newAuthData)){
             throw new DataAccessExceptionHTTP(500,"Error in creating new token. Please try again.");
         }
@@ -70,11 +67,7 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public Game getGameData(int gameId) throws DataAccessExceptionHTTP {
-        Game memoryGame = gameDataMap.get(gameId);
-        if(memoryGame == null){
-            throw new DataAccessExceptionHTTP(400,"Error in returning game. Game not found. Please try again.");
-        }
-        return memoryGame;
+        return gameDataMap.get(gameId);
     }
 
     @Override

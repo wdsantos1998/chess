@@ -1,21 +1,21 @@
 package model;
-
 import chess.ChessGame;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import static java.lang.Integer.parseInt;
-
 public class Game {
     private final int  gameId;
+    @Nullable
     private String whiteUsername;
+    @Nullable
     private String blackUsername;
     private String gameName;
     private ChessGame game;
 
 
-    public Game(String whiteUsername, String blackUsername, String gameName) {
+    public Game(@Nullable String whiteUsername, @Nullable String blackUsername, String gameName) {
         this.gameId = generateUniqueId();
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
@@ -39,10 +39,12 @@ public class Game {
         this.gameName = gameName;
     }
 
+    @Nullable
     public String getBlackUsername() {
         return blackUsername;
     }
 
+    @Nullable
     public String getWhiteUsername() {
         return whiteUsername;
     }
@@ -50,11 +52,11 @@ public class Game {
         this.game = game;
     }
 
-    public void setWhiteUsername(String whiteUsername) {
+    public void setWhiteUsername(@Nullable String whiteUsername) {
         this.whiteUsername = whiteUsername;
     }
 
-    public void setBlackUsername(String blackUsername) {
+    public void setBlackUsername(@Nullable String blackUsername) {
         this.blackUsername = blackUsername;
     }
 
