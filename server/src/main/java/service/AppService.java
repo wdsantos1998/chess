@@ -1,7 +1,13 @@
 package service;
 import data.access.DataAccess;
+import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
 import model.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AppService {
 
@@ -30,7 +36,7 @@ public class AppService {
     public authData login(LoginRequest user) throws DataAccessExceptionHTTP {
         try {
             if(user.getUsername() == null || user.getPassword() == null) {
-                throw new DataAccessExceptionHTTP(400, "Error: bad request");
+                throw new DataAccessException("Error: bad request");
             }
             User isRegisteredUser = dataAccess.getUser(user.getUsername());
             if( isRegisteredUser != null) {
@@ -52,8 +58,8 @@ public class AppService {
             if (gameRequest.getGameName() == null || gameRequest.getAuthToken() == null) {
                 throw new DataAccessExceptionHTTP(400, "Error: bad request");
             }
-            boolean isValidToken = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
-            if (!isValidToken) {
+            boolean isTokenValid = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
+            if (!isTokenValid) {
                 throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
             }
             return dataAccess.createGame(new Game(null, null, gameRequest.getGameName()));
@@ -64,13 +70,68 @@ public class AppService {
         }
     }
 
+    public void joinGame(JoinGameRequest joinGameRequestData)throws DataAccessExceptionHTTP {
+        try{
+            boolean isTokenValid = dataAccess.isValidAuthToken(joinGameRequestData.getAuthToken());
+            if(!isTokenValid){
+                throw new DataAccessExceptionHTTP(401,"Error: unauthorized");
+            }
+            Game gameData = dataAccess.getGameData(joinGameRequestData.getGameId());
+            if(gameData == null){
+                throw new DataAccessExceptionHTTP(400,"Error: bad request");
+            }
+            List<String> playableColors = List.of("WHITE","BLACK");
+            if(!playableColors.contains(joinGameRequestData.getPlayerColor()) ){
+                throw new DataAccessExceptionHTTP(400,"Error: bad request");
+            }
+            boolean isWhiteTeamAvailable = gameData.getWhiteUsername() == null;
+            boolean isBlackTeamAvailable = gameData.getBlackUsername() == null;
+            Map<String,Boolean> IsTeamAvailable = new HashMap<>();
+            IsTeamAvailable.put("WHITE",isWhiteTeamAvailable);
+            IsTeamAvailable.put("BLACK",isBlackTeamAvailable);
+            if(!IsTeamAvailable.get(joinGameRequestData.getPlayerColor())){
+                throw new DataAccessExceptionHTTP(403,"Error: already taken");
+            }
+             String usernameRequestingToJoin = dataAccess.getAuthData(joinGameRequestData.getAuthToken()).getUsername();
+             Game gameToUpdate = dataAccess.getGameData(joinGameRequestData.getGameId());
+             if(joinGameRequestData.getPlayerColor().equalsIgnoreCase("WHITE")){
+                 gameToUpdate.setWhiteUsername(usernameRequestingToJoin);
+             }
+             else {
+                 gameToUpdate.setBlackUsername(usernameRequestingToJoin);
+             }
+               dataAccess.updateGame(gameToUpdate);
+        } catch (DataAccessExceptionHTTP e) {
+            throw new DataAccessExceptionHTTP(e.getStatusCode(),e.getMessage());
+        }
+        catch (Exception e){
+            throw new DataAccessExceptionHTTP(500,e.getMessage());
+        }
+    }
+
+    public List<GameListData> listGames(String authToken) throws DataAccessExceptionHTTP {
+        try{
+            boolean isTokenValid = dataAccess.isValidAuthToken(authToken);
+            if(!isTokenValid){
+                throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
+            }
+            return dataAccess.listGames();
+        }
+        catch( DataAccessExceptionHTTP e){
+            throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
+        }
+        catch (Exception e){
+            throw new DataAccessExceptionHTTP(500, e.getMessage());
+        }
+    }
+
     public void logout(String authToken) throws DataAccessExceptionHTTP {
         try {
             if (authToken == null) {
                 throw new DataAccessExceptionHTTP(400, "Error: bad request");
             }
-            boolean isValidToken = dataAccess.isValidAuthToken(authToken);
-            if (!isValidToken) {
+            boolean isTokenValid = dataAccess.isValidAuthToken(authToken);
+            if (!isTokenValid) {
                 throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
             }
             dataAccess.deleteAuthToken(authToken);
@@ -89,9 +150,5 @@ public class AppService {
             throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
         }
     }
-
-
-
-
 
 }

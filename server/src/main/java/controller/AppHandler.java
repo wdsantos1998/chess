@@ -9,10 +9,10 @@ import data.access.DataAccessExceptionHTTP;
 import model.*;
 import service.AppService;
 
+import java.util.List;
 import java.util.Map;
 
-import static spark.Spark.delete;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 public class AppHandler {
     private static final Gson gson = new Gson();
@@ -66,6 +66,44 @@ public class AppHandler {
                 res.status(200);
                 System.out.println("Game id in create game "+response.getGameId());
                 return gson.toJson(Map.of("gameID", response.getGameId()));
+            } catch (DataAccessExceptionHTTP e) {
+                res.status(e.getStatusCode());
+                return gson.toJson(Map.of(
+                        "message", e.getMessage()
+                ));
+            }
+        });
+        put("/game", (req, res) -> {
+            try {
+                JsonObject requestJsonObject = gson.fromJson(req.body(), JsonObject.class);
+                String authToken = req.headers("authorization");
+                if (requestJsonObject == null || !requestJsonObject.has("gameID") || !requestJsonObject.has("playerColor") || authToken == null) {
+                    throw new DataAccessExceptionHTTP(400, "Error: bad request");
+                }
+                String gameID = requestJsonObject.get("gameID").getAsString();
+                String playerColor = requestJsonObject.get("playerColor").getAsString();
+
+                JoinGameRequest joinGameRequestData = new JoinGameRequest(authToken,playerColor, Integer.parseInt(gameID) );
+                appService.joinGame(joinGameRequestData);
+                res.status(200);
+                res.type("application/json");
+                return gson.toJson(new Object());
+            } catch (DataAccessExceptionHTTP e) {
+                res.status(e.getStatusCode());
+                return gson.toJson(Map.of(
+                        "message", e.getMessage()
+                ));
+            }
+        });
+        get("/game", (req, res) -> {
+            try {
+            String authToken = req.headers("authorization");
+            if(authToken == null){
+                throw new DataAccessExceptionHTTP(400,"Error: bad request" );
+            }
+                List<GameListData> response =  appService.listGames(authToken);
+                res.status(200);
+                return gson.toJson(Map.of("games", response));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
                 return gson.toJson(Map.of(
