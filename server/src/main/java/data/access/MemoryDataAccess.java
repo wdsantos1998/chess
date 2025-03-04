@@ -9,9 +9,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MemoryDataAccess implements DataAccess{
-    Map<String, User> userDataMap = new HashMap<>();
-    Map<String, authData> authDataMap = new HashMap<>();
-    Map<Integer, Game> gameDataMap = new HashMap<>();
+    private final Map<String, User> userDataMap = new HashMap<>();
+    private final  Map<String, authData> authDataMap = new HashMap<>();
+    private final Map<Integer, Game> gameDataMap = new HashMap<>();
     @Override
     public boolean addUser(User user) throws DataAccessExceptionHTTP {
         userDataMap.put(user.getUsername(), user);

@@ -3,8 +3,8 @@ package model;
 import java.util.Objects;
 
 public class GameRequest {
-    private String gameName;
-    private String authToken;
+    private final String gameName;
+    private final String authToken;
 
     public GameRequest(String gameName, String authToken) {
         this.gameName = gameName;

@@ -58,13 +58,16 @@ public class AppHandler {
             }
         });
         post("/game", (req, res) -> {
+            try {
             String gameName = gson.fromJson(req.body(), JsonObject.class).get("gameName").getAsString();
             String authToken = req.headers("authorization");
-            GameRequest gameRequest = new GameRequest(gameName, authToken);
-            try {
+
+            if(authToken == null || gameName == null){
+                throw new DataAccessExceptionHTTP(400,"Error: bad request.");
+            }
+                GameRequest gameRequest = new GameRequest(gameName, authToken);
                 Game response = appService.createGame(gameRequest);
                 res.status(200);
-                System.out.println("Game id in create game "+response.getGameId());
                 return gson.toJson(Map.of("gameID", response.getGameId()));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
@@ -80,10 +83,10 @@ public class AppHandler {
                 if (requestJsonObject == null || !requestJsonObject.has("gameID") || !requestJsonObject.has("playerColor") || authToken == null) {
                     throw new DataAccessExceptionHTTP(400, "Error: bad request");
                 }
-                String gameID = requestJsonObject.get("gameID").getAsString();
+                int gameID = requestJsonObject.get("gameID").getAsInt();
                 String playerColor = requestJsonObject.get("playerColor").getAsString();
 
-                JoinGameRequest joinGameRequestData = new JoinGameRequest(authToken,playerColor, Integer.parseInt(gameID) );
+                JoinGameRequest joinGameRequestData = new JoinGameRequest(authToken,playerColor, gameID );
                 appService.joinGame(joinGameRequestData);
                 res.status(200);
                 res.type("application/json");
@@ -112,13 +115,12 @@ public class AppHandler {
             }
         });
         delete("/session", (req, res) -> {
-            System.out.println("Calling logout API");
             try {
                 String authToken = req.headers("authorization");
                 if(authToken == null){
                     throw new DataAccessExceptionHTTP(400, "Error: bad request");
                 }
-                appService.logout(req.headers("authorization"));
+                appService.logout(authToken);
                 res.status(200);
                 res.type("application/json");
                 return gson.toJson(new Object());

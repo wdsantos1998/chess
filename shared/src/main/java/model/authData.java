@@ -8,7 +8,7 @@ public class authData {
 
 
     public authData(String username) {
-        this.authToken = UUID.randomUUID().toString() + username;
+        this.authToken = UUID.randomUUID()+username;
         this.username = username;
     }
 

@@ -42,7 +42,7 @@ public class AppService {
             if( isRegisteredUser != null) {
                 LoginRequest loginRequestObject = new LoginRequest(isRegisteredUser.getUsername(), isRegisteredUser.getPassword());
                 if (loginRequestObject.equals(user)) {
-                    return new authData(user.getUsername());
+                    return dataAccess.createAuthData(user.getUsername());
                 }
             }
             throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
@@ -55,12 +55,8 @@ public class AppService {
 
     public Game createGame(GameRequest gameRequest) throws DataAccessExceptionHTTP {
         try {
-            if (gameRequest.getGameName() == null || gameRequest.getAuthToken() == null) {
-                throw new DataAccessExceptionHTTP(400, "Error: bad request");
-            }
             boolean isTokenValid = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
             if (!isTokenValid) {
-                System.out.println("I am sending and unauthorized error for this request "+gameRequest.toString());
                 throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
             }
             return dataAccess.createGame(new Game(null, null, gameRequest.getGameName()));
@@ -71,14 +67,14 @@ public class AppService {
         }
     }
 
-    public void joinGame(JoinGameRequest joinGameRequestData)throws DataAccessExceptionHTTP {
+    public void joinGame(JoinGameRequest joinGameRequestData) throws DataAccessExceptionHTTP {
         try{
             boolean isTokenValid = dataAccess.isValidAuthToken(joinGameRequestData.getAuthToken());
             if(!isTokenValid){
-                System.out.println("I am getting an unauthorized error");
                 throw new DataAccessExceptionHTTP(401,"Error: unauthorized");
             }
             Game gameData = dataAccess.getGameData(joinGameRequestData.getGameId());
+
             if(gameData == null){
                 throw new DataAccessExceptionHTTP(400,"Error: bad request");
             }
