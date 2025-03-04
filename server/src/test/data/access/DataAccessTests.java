@@ -45,17 +45,17 @@ class DataAccessTests {
     void testCreateAuthData() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        authData token = dataAccess.createAuthData(user);
-        assertEquals(token,dataAccess.getAuthData(user));
+        authData token = dataAccess.createAuthData(user.getUsername());
+        assertEquals(token,dataAccess.getAuthData(user.getUsername()));
     }
 
     @Test
     void testDeleteAuthToken() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        dataAccess.createAuthData(user);
+        dataAccess.createAuthData(user.getUsername());
         assertTrue(dataAccess.deleteAuthToken(user));
-        Executable executable = () -> dataAccess.getAuthData(user);
+        Executable executable = () -> dataAccess.getAuthData(user.getUsername());
         assertThrows(DataAccessExceptionHTTP.class, executable);
     }
 
@@ -93,12 +93,12 @@ class DataAccessTests {
     void testClear() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        dataAccess.createAuthData(user);
+        dataAccess.createAuthData(user.getUsername());
         Game game = new Game("fakeWhite", "fakeBlack", "fakeGame1");
         dataAccess.createGame(game);
         assertTrue(dataAccess.clear());
         assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getUser(user.getUsername()));
-        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getAuthData(user));
+        assertThrows(DataAccessExceptionHTTP.class, () -> dataAccess.getAuthData(user.getUsername()));
         assertThrows(DataAccessExceptionHTTP.class,( )-> dataAccess.listGames().isEmpty());
     }
 }

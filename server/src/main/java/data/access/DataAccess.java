@@ -26,20 +26,20 @@ public interface DataAccess {
 
     /**
      * Function user to return authData from a user
-     * @param user of type User
+     * @param username of type User
      * @return authToken associated to given user.
      * @throws DataAccessExceptionHTTP is any error occurs
      */
-    authData getAuthData(User user)  throws DataAccessExceptionHTTP;
+    authData getAuthData(String username)  throws DataAccessExceptionHTTP;
 
 
     /**
      *Function to create autoToken
-     * @param user of type user. This parameter indicated to which username the authToken will be associated to.
+     * @param username of type user. This parameter indicated to which username the authToken will be associated to.
      * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    authData createAuthData(User user) throws DataAccessExceptionHTTP;
+    authData createAuthData(String username) throws DataAccessExceptionHTTP;
 
 
     /**
