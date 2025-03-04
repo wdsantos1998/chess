@@ -65,17 +65,6 @@ public class Game {
     }
 
     @Override
-    public String toString() {
-        return "Game{" +
-                "gameId=" + gameId +
-                ", whiteUsername='" + whiteUsername + '\'' +
-                ", blackUsername='" + blackUsername + '\'' +
-                ", gameName='" + gameName + '\'' +
-                ", game=" + game +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -90,5 +79,16 @@ public class Game {
     @Override
     public int hashCode() {
         return Objects.hash(gameId, whiteUsername, blackUsername, gameName, game);
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "gameId=" + gameId +
+                ", whiteUsername='" + whiteUsername + '\'' +
+                ", blackUsername='" + blackUsername + '\'' +
+                ", gameName='" + gameName + '\'' +
+                ", game=" + game +
+                '}';
     }
 }
