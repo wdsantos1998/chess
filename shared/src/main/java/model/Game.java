@@ -65,6 +65,17 @@ public class Game {
     }
 
     @Override
+    public String toString() {
+        return "Game{" +
+                "gameId=" + gameId +
+                ", whiteUsername='" + whiteUsername + '\'' +
+                ", blackUsername='" + blackUsername + '\'' +
+                ", gameName='" + gameName + '\'' +
+                ", game=" + game +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
