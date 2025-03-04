@@ -6,9 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
-import model.LoginRequest;
-import model.User;
-import model.authData;
+import model.*;
 import service.AppService;
 
 import java.util.Map;
@@ -52,6 +50,21 @@ public class AppHandler {
                 authData response = appService.login(loginRequestData);
                 res.status(200);
                 return gson.toJson(response);
+            } catch (DataAccessExceptionHTTP e) {
+                res.status(e.getStatusCode());
+                return gson.toJson(Map.of(
+                        "message", e.getMessage()
+                ));
+            }
+        });
+        post("/game", (req, res) -> {
+            String gameName = gson.fromJson(req.body(), JsonObject.class).get("gameName").getAsString();
+            String authToken = req.headers("authorization");
+            GameRequest gameRequest = new GameRequest(gameName, authToken);
+            try {
+                Game response = appService.createGame(gameRequest);
+                res.status(200);
+                return gson.toJson(Map.of("gameID", response.getGameId()));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
                 return gson.toJson(Map.of(

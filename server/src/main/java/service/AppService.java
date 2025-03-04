@@ -50,8 +50,11 @@ public class AppService {
     public Game createGame(GameRequest gameRequest) throws DataAccessExceptionHTTP {
         try {
             try {
-                authData authToken = dataAccess.getAuthData(gameRequest.getAuthToken());
-                if (authToken == null) {
+                if(gameRequest.getGameName() == null || gameRequest.getAuthToken() == null){
+                    throw new DataAccessExceptionHTTP(400, "Error: bad request");
+                }
+                boolean isValidToken = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
+                if (!isValidToken) {
                     throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
                 }
                 return dataAccess.createGame(new Game(null,null,gameRequest.getGameName()));
@@ -59,7 +62,6 @@ public class AppService {
                 throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
             }
         } catch (Exception e) {
-            System.out.println("THis is the error: " + e.getMessage());
             throw new DataAccessExceptionHTTP(500, e.getMessage());
         }
     }
