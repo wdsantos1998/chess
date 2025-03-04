@@ -1,10 +1,12 @@
 package data.access;
 
 import model.Game;
+import model.GameListData;
 import model.User;
 import model.authData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MemoryDataAccess implements DataAccess{
     Map<String, User> userDataMap = new HashMap<>();
@@ -51,13 +53,10 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public boolean updateGame(Game game) throws DataAccessExceptionHTTP {
-        Game gameOldVersion = gameDataMap.get(game.getGameId());
-        gameDataMap.replace(game.getGameId(), game);
-        if(gameOldVersion.equals(gameDataMap.get(game.getGameId()))){
-            throw new DataAccessExceptionHTTP(500,"Error in updating game settings. Please try again.");
-        }
-        return true;
+    public void updateGame(Game game) throws DataAccessExceptionHTTP {
+        int gameId = game.getGameId();
+        gameDataMap.remove(gameId);
+        gameDataMap.put(gameId, game);
     }
 
     @Override
@@ -75,12 +74,13 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public List<Game> listGames() throws DataAccessExceptionHTTP {
-        List<Game> listOfGames = new ArrayList<>(gameDataMap.values());
-        if(listOfGames.isEmpty()){
-            throw new DataAccessExceptionHTTP(500,"Error in returning list of games. List is empty. Please try again.");
-        }
-        return listOfGames;
+    public List<GameListData> listGames() throws DataAccessExceptionHTTP {
+        return gameDataMap.values().stream().map(game ->  new GameListData(
+                        game.getGameId(),
+                        game.getWhiteUsername(),
+                        game.getBlackUsername(),
+                        game.getGameName()))
+                .collect(Collectors.toList());
     }
 
     @Override

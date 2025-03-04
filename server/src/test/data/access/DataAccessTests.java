@@ -1,6 +1,7 @@
 package data.access;
 import data.access.DataAccessExceptionHTTP;
 import model.Game;
+import model.GameListData;
 import model.User;
 import model.authData;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +84,7 @@ class DataAccessTests {
         Game game2 = new Game("fakeWhite", "fakeBlack", "fakeGame2");
         dataAccess.createGame(game1);
         dataAccess.createGame(game2);
-        List<Game> games = dataAccess.listGames();
+        List<GameListData> games = dataAccess.listGames();
         assertEquals(2, games.size());
         assertTrue(games.contains(game1));
         assertTrue(games.contains(game2));

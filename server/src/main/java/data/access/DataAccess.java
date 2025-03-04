@@ -1,6 +1,7 @@
 package data.access;
 
 import model.Game;
+import model.GameListData;
 import model.User;
 import model.authData;
 
@@ -58,12 +59,12 @@ public interface DataAccess {
     boolean deleteAuthToken(String autToken) throws DataAccessExceptionHTTP;
 
     /**
-     *Function to update chess game.
+     * Function to update chess game.
+     *
      * @param game of type String. This parameter is used to extract the gameId and update the information passed in the corresponding gameId
-     * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    boolean updateGame(Game game) throws DataAccessExceptionHTTP;
+    void updateGame(Game game) throws DataAccessExceptionHTTP;
 
     /**
      *Function to create a chess game.
@@ -87,7 +88,7 @@ public interface DataAccess {
      * @return list of games stored in memory
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    List<Game> listGames() throws DataAccessExceptionHTTP;
+    List<GameListData> listGames() throws DataAccessExceptionHTTP;
 
     /**
      *Function to clear all the memory in games, users and authTokens
