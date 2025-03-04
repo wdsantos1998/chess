@@ -22,14 +22,19 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public authData getAuthData(String username) throws DataAccessExceptionHTTP {
-        return authDataMap.get(username);
+    public authData getAuthData(String authToken) throws DataAccessExceptionHTTP {
+        return authDataMap.get(authToken);
+    }
+
+    @Override
+    public boolean isValidAuthToken(String authToken) throws DataAccessExceptionHTTP {
+        return authDataMap.get(authToken) != null && authDataMap.get(authToken).getAuthToken().equals(authToken);
     }
 
     @Override
     public authData createAuthData(String username) throws DataAccessExceptionHTTP {
         authData newAuthData =  new authData(username);
-        authDataMap.put(username,newAuthData);
+        authDataMap.put(newAuthData.getAuthToken(),newAuthData);
         if(!authDataMap.containsValue(newAuthData)){
             throw new DataAccessExceptionHTTP(500,"Error in creating new token. Please try again.");
         }
@@ -37,9 +42,9 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public boolean deleteAuthToken(User user) throws DataAccessExceptionHTTP {
-        authDataMap.remove(user.getUsername());
-        if(authDataMap.containsKey(user.getUsername())){
+    public boolean deleteAuthToken(String authToken) throws DataAccessExceptionHTTP {
+        authDataMap.remove(authToken);
+        if(authDataMap.containsKey(authToken)){
             throw new DataAccessExceptionHTTP(500,"Error in deleting token. Please try again.");
         }
         return true;

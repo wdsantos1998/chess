@@ -53,8 +53,8 @@ class DataAccessTests {
     void testDeleteAuthToken() throws DataAccessExceptionHTTP {
         User user = new User("fakeUser", "password", "fake@gmail.com");
         dataAccess.addUser(user);
-        dataAccess.createAuthData(user.getUsername());
-        assertTrue(dataAccess.deleteAuthToken(user));
+        authData token = dataAccess.createAuthData(user.getUsername());
+        assertTrue(dataAccess.deleteAuthToken(token.getAuthToken()));
         Executable executable = () -> dataAccess.getAuthData(user.getUsername());
         assertThrows(DataAccessExceptionHTTP.class, executable);
     }

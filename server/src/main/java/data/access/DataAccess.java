@@ -26,12 +26,19 @@ public interface DataAccess {
 
     /**
      * Function user to return authData from a user
-     * @param username of type User
+     * @param authData of type String
      * @return authToken associated to given user.
      * @throws DataAccessExceptionHTTP is any error occurs
      */
-    authData getAuthData(String username)  throws DataAccessExceptionHTTP;
+    authData getAuthData(String authData)  throws DataAccessExceptionHTTP;
 
+    /**
+     * Function to verify authToken
+     * @param authToken of type String
+     * @return true/false if the authToken is valid
+     * @throws DataAccessExceptionHTTP is any error occurs
+     */
+    boolean isValidAuthToken(String authToken)  throws DataAccessExceptionHTTP;
 
     /**
      *Function to create autoToken
@@ -44,15 +51,15 @@ public interface DataAccess {
 
     /**
      *Function to delete autoToken
-     * @param user of type user. This parameter indicates to which user the authToken is associated to.
+     * @param autToken of type String. This parameter indicates which authToken we must delete.
      * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    boolean deleteAuthToken(User user) throws DataAccessExceptionHTTP;
+    boolean deleteAuthToken(String autToken) throws DataAccessExceptionHTTP;
 
     /**
      *Function to update chess game.
-     * @param game of type Game. This parameter is used to extract the gameId and update the information passed in the corresponding gameId
+     * @param game of type String. This parameter is used to extract the gameId and update the information passed in the corresponding gameId
      * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
@@ -69,6 +76,7 @@ public interface DataAccess {
 
     /**
      *Function to return specific game based on gameId
+     * @param gameId of type int. It points to the gameId stored in the system.
      * @return game
      * @throws DataAccessExceptionHTTP in case of any error
      */
