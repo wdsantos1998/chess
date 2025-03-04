@@ -3,7 +3,6 @@ package data.access;
 import model.Game;
 import model.User;
 import model.authData;
-import org.eclipse.jetty.util.StringUtil;
 
 import java.util.*;
 
