@@ -6,4 +6,5 @@ public record AuthData(String username, String authToken) {
     public AuthData(String username) {
         this(username, UUID.randomUUID()+ username);
     }
+    //reverting again.
 }
