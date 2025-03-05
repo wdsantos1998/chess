@@ -12,13 +12,13 @@ The application implements a multiplayer chess server and a command line chess c
 
 The application has three modules.
 
-- **Client**: The command line program used to play a game of chess over the network.
+- **Client**: The command line program used to play a gameData of chess over the network.
 - **Server**: The command line program that listens for network requests from the client and manages users and games.
-- **Shared**: Code that is used by both the client and the server. This includes the rules of chess and tracking the state of a game.
+- **Shared**: Code that is used by both the client and the server. This includes the rules of chess and tracking the state of a gameData.
 
 ## Starter Code
 
-As you create your chess application you will move through specific phases of development. This starts with implementing the moves of chess and finishes with sending game moves over the network between your client and server. You will start each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project. Do not copy a phases' starter code before you are ready to begin work on that phase.
+As you create your chess application you will move through specific phases of development. This starts with implementing the moves of chess and finishes with sending gameData moves over the network between your client and server. You will start each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project. Do not copy a phases' starter code before you are ready to begin work on that phase.
 
 ## IntelliJ Support
 
