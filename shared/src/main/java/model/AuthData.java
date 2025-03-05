@@ -6,5 +6,5 @@ public record AuthData(String username, String authToken) {
     public AuthData(String username) {
         this(username, UUID.randomUUID()+ username);
     }
-    //Just to include the testing file.
+    //Just to commit something
 }
