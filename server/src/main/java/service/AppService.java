@@ -16,6 +16,7 @@ public class AppService {
     public AppService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
+    //Reverting branch.
 
     public authData register(User user) throws DataAccessExceptionHTTP {
         if (user.getUsername() == null || user.getPassword() == null || user.getEmail() == null ) {
