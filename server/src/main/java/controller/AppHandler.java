@@ -2,9 +2,7 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
 import model.*;
 import service.AppService;
@@ -25,9 +23,9 @@ public class AppHandler {
     public void startRoutes() {
         post("/user", (req, res) -> {
             try {
-                User userData = gson.fromJson(req.body(), User.class);
+                UserData userData = gson.fromJson(req.body(), UserData.class);
                 try {
-                    authData response = appService.register(userData);
+                    AuthData response = appService.register(userData);
                     res.status(200);
                     return gson.toJson(response);
                 } catch (DataAccessExceptionHTTP e) {
@@ -47,7 +45,7 @@ public class AppHandler {
         post("/session", (req, res) -> {
             LoginRequest loginRequestData = gson.fromJson(req.body(), LoginRequest.class);
             try {
-                authData response = appService.login(loginRequestData);
+                AuthData response = appService.login(loginRequestData);
                 res.status(200);
                 return gson.toJson(response);
             } catch (DataAccessExceptionHTTP e) {
@@ -66,9 +64,9 @@ public class AppHandler {
                 throw new DataAccessExceptionHTTP(400,"Error: bad request.");
             }
                 GameRequest gameRequest = new GameRequest(gameName, authToken);
-                Game response = appService.createGame(gameRequest);
+                GameData response = appService.createGame(gameRequest);
                 res.status(200);
-                return gson.toJson(Map.of("gameID", response.getGameId()));
+                return gson.toJson(Map.of("gameID", response.gameID()));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
                 return gson.toJson(Map.of(

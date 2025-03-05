@@ -15,12 +15,12 @@ public class ServiceTests {
 
     //The initial setup and init are basically a copy of the StandardAPITest.java file
 
-    private static User existingUser;
-    private static User newUser;
+    private static UserData existingUserData;
+    private static UserData newUserData;
     private static AppService service;
     private String existingAuth;
     private String newAuth;
-    private static Game existingGameSession;
+    private static GameData existingGameDataSession;
 
 
     @AfterAll
@@ -31,18 +31,18 @@ public class ServiceTests {
     @BeforeAll
     public static void init() {
         service = new AppService(new MemoryDataAccess());
-        existingUser = new User("ExistingUser", "existingUserPassword", "eu@mail.com");
-        newUser = new User("brandNewUser", "newUserPassword", "nu@mail.com");
+        existingUserData = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
+        newUserData = new UserData("brandNewUser", "newUserPassword", "nu@mail.com");
     }
 
     @BeforeEach
     public void setup() throws DataAccessExceptionHTTP {
         service.clearApplication();
-        authData regResult = service.register(existingUser);
-        authData regResult_2 = service.register(newUser);
-        existingAuth = regResult.getAuthToken();
-        newAuth = regResult_2.getAuthToken();
-        existingGameSession = service.createGame(new GameRequest("ExistingGame", existingAuth));
+        AuthData regResult = service.register(existingUserData);
+        AuthData regResult_2 = service.register(newUserData);
+        existingAuth = regResult.authToken();
+        newAuth = regResult_2.authToken();
+        existingGameDataSession = service.createGame(new GameRequest("ExistingGame", existingAuth));
 
     }
 
@@ -50,21 +50,21 @@ public class ServiceTests {
     @Order(1)
     @DisplayName("Testing register service")
     public void testRegister() throws DataAccessExceptionHTTP {
-        User user = new User("NewUser", "newUserPassword", "nu@mail.com");
-        authData result = service.register(user);
+        UserData userData = new UserData("NewUser", "newUserPassword", "nu@mail.com");
+        AuthData result = service.register(userData);
         assertNotNull(result);
-        assertNotNull(result.getAuthToken());
-        assertEquals("NewUser", result.getUsername());
+        assertNotNull(result.authToken());
+        assertEquals("NewUser", result.username());
     }
 
     @Test
     @Order(2)
     @DisplayName("Testing duplicate registration")
     public void testRegisterDuplicateUser() throws DataAccessExceptionHTTP {
-        User user = new User("ExistingUser", "existingUserPassword", "eu@mail.com");
+        UserData userData = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
 
         DataAccessExceptionHTTP exception = assertThrows(DataAccessExceptionHTTP.class, () -> {
-            service.register(user);
+            service.register(userData);
         });
 
         assertEquals(403, exception.getStatusCode());
@@ -77,11 +77,11 @@ public class ServiceTests {
     public void testLogin() throws DataAccessExceptionHTTP {
         LoginRequest loginRequest = new LoginRequest("ExistingUser", "existingUserPassword");
 
-        authData result = service.login(loginRequest);
+        AuthData result = service.login(loginRequest);
 
         assertNotNull(result);
-        assertNotNull(result.getAuthToken());
-        assertEquals("ExistingUser", result.getUsername());
+        assertNotNull(result.authToken());
+        assertEquals("ExistingUser", result.username());
     }
 
     @Test
@@ -138,9 +138,9 @@ public class ServiceTests {
     public void testingListOfGames() throws DataAccessExceptionHTTP {
         List<GameListData> singleGame = service.listGames(existingAuth);
         assertEquals(1, singleGame.size());
-        assertEquals("ExistingGame", singleGame.getFirst().getGameName());
-        assertNull(singleGame.getFirst().getWhiteUsername());
-        assertNull(singleGame.getFirst().getWhiteUsername());
+        assertEquals("ExistingGame", singleGame.getFirst().gameName());
+        assertNull(singleGame.getFirst().whiteUsername());
+        assertNull(singleGame.getFirst(). blackUsername());
     }
     @Test
     @Order(9)
@@ -157,20 +157,20 @@ public class ServiceTests {
     @Order(10)
     @DisplayName("Testing join game service")
     public void testingJoinExistingGame() throws DataAccessExceptionHTTP {
-        JoinGameRequest joinAsWhiteToExistingGame = new JoinGameRequest(existingAuth, "WHITE", existingGameSession.getGameId());
+        JoinGameRequest joinAsWhiteToExistingGame = new JoinGameRequest(existingAuth, "WHITE", existingGameDataSession.gameID());
         service.joinGame(joinAsWhiteToExistingGame);
         List<GameListData> singleGame = service.listGames(existingAuth);
-        assertEquals(existingUser.getUsername(), singleGame.getFirst().getWhiteUsername());
+        assertEquals(existingUserData.username(), singleGame.getFirst().whiteUsername());
     }
     @Test
     @Order(11)
     @DisplayName("Testing join game: Trying to join a taken color")
     public void testingJoinGameOnTakenTeamColor() throws DataAccessExceptionHTTP {
-        JoinGameRequest joinAsWhiteToExistingGame = new JoinGameRequest(existingAuth, "WHITE", existingGameSession.getGameId());
+        JoinGameRequest joinAsWhiteToExistingGame = new JoinGameRequest(existingAuth, "WHITE", existingGameDataSession.gameID());
 
         service.joinGame(joinAsWhiteToExistingGame);
 
-        JoinGameRequest joinAgainAsWhiteToExistingGame = new JoinGameRequest(newAuth, "WHITE", existingGameSession.getGameId());
+        JoinGameRequest joinAgainAsWhiteToExistingGame = new JoinGameRequest(newAuth, "WHITE", existingGameDataSession.gameID());
         DataAccessExceptionHTTP exception = assertThrows(DataAccessExceptionHTTP.class, () -> {
             service.joinGame(joinAgainAsWhiteToExistingGame);
         });
@@ -183,10 +183,10 @@ public class ServiceTests {
     @DisplayName("Testing create game service")
     public void testingCreateGame() throws DataAccessExceptionHTTP {
         GameRequest newGame = new GameRequest("NewGame",existingAuth);
-        Game newGameObject = service.createGame(newGame);
-        assertEquals("NewGame", newGameObject.getGameName());
-        assertNull(newGameObject.getWhiteUsername());
-        assertNull(newGameObject.getWhiteUsername());
+        GameData newGameDataObject = service.createGame(newGame);
+        assertEquals("NewGame", newGameDataObject.gameName());
+        assertNull(newGameDataObject.whiteUsername());
+        assertNull(newGameDataObject.blackUsername());
     }
 
     @Test
