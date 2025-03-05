@@ -1,42 +1,42 @@
 package data.access;
 
-import model.Game;
+import model.GameData;
 import model.GameListData;
-import model.User;
-import model.authData;
+import model.UserData;
+import model.AuthData;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MemoryDataAccess implements DataAccess{
-    private final Map<String, User> userDataMap = new HashMap<>();
-    private final  Map<String, authData> authDataMap = new HashMap<>();
-    private final Map<Integer, Game> gameDataMap = new HashMap<>();
+    private final Map<String, UserData> userDataMap = new HashMap<>();
+    private final  Map<String, AuthData> authDataMap = new HashMap<>();
+    private final Map<Integer, GameData> gameDataMap = new HashMap<>();
     @Override
-    public boolean addUser(User user) throws DataAccessExceptionHTTP {
-        userDataMap.put(user.getUsername(), user);
-        return userDataMap.containsValue(user);
+    public boolean addUser(UserData userData) throws DataAccessExceptionHTTP {
+        userDataMap.put(userData.username(), userData);
+        return userDataMap.containsValue(userData);
     }
 
     @Override
-    public User getUser(String username) throws DataAccessExceptionHTTP {
+    public UserData getUser(String username) throws DataAccessExceptionHTTP {
         return userDataMap.get(username);
     }
 
     @Override
-    public authData getAuthData(String authToken) throws DataAccessExceptionHTTP {
+    public AuthData getAuthData(String authToken) throws DataAccessExceptionHTTP {
         return authDataMap.get(authToken);
     }
 
     @Override
     public boolean isValidAuthToken(String authToken) throws DataAccessExceptionHTTP {
-        return authDataMap.get(authToken) != null && authDataMap.get(authToken).getAuthToken().equalsIgnoreCase(authToken);
+        return authDataMap.get(authToken) != null && authDataMap.get(authToken).authToken().equalsIgnoreCase(authToken);
     }
 
     @Override
-    public authData createAuthData(String username) throws DataAccessExceptionHTTP {
-        authData newAuthData =  new authData(username);
-        authDataMap.put(newAuthData.getAuthToken(),newAuthData);
+    public AuthData createAuthData(String username) throws DataAccessExceptionHTTP {
+        AuthData newAuthData =  new AuthData(username);
+        authDataMap.put(newAuthData.authToken(),newAuthData);
         if(!authDataMap.containsValue(newAuthData)){
             throw new DataAccessExceptionHTTP(500,"Error in creating new token. Please try again.");
         }
@@ -53,33 +53,33 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public void updateGame(Game game) throws DataAccessExceptionHTTP {
-        int gameId = game.getGameId();
+    public void updateGame(GameData gameData) throws DataAccessExceptionHTTP {
+        int gameId = gameData.gameID();
         gameDataMap.remove(gameId);
-        gameDataMap.put(gameId, game);
+        gameDataMap.put(gameId, gameData);
     }
 
     @Override
-    public Game createGame(Game game) throws DataAccessExceptionHTTP {
-        gameDataMap.put(game.getGameId(), game);
-        if(!gameDataMap.containsValue(game)){
+    public GameData createGame(GameData gameData) throws DataAccessExceptionHTTP {
+        gameDataMap.put(gameData.gameID(), gameData);
+        if(!gameDataMap.containsValue(gameData)){
             throw new DataAccessExceptionHTTP(500,"Error in creating new game. Please try again.");
         }
-        return game;
+        return gameData;
     }
 
     @Override
-    public Game getGameData(int gameId) throws DataAccessExceptionHTTP {
+    public GameData getGameData(int gameId) throws DataAccessExceptionHTTP {
         return gameDataMap.get(gameId);
     }
 
     @Override
     public List<GameListData> listGames() throws DataAccessExceptionHTTP {
         return gameDataMap.values().stream().map(game ->  new GameListData(
-                        game.getGameId(),
-                        game.getWhiteUsername(),
-                        game.getBlackUsername(),
-                        game.getGameName()))
+                        game.gameID(),
+                        game.whiteUsername(),
+                        game.blackUsername(),
+                        game.gameName()))
                 .collect(Collectors.toList());
     }
 

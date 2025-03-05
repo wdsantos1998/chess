@@ -4,7 +4,6 @@ import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
 import model.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,32 +17,32 @@ public class AppService {
     }
     //Reverting branch.
 
-    public authData register(User user) throws DataAccessExceptionHTTP {
-        if (user.getUsername() == null || user.getPassword() == null || user.getEmail() == null ) {
+    public AuthData register(UserData userData) throws DataAccessExceptionHTTP {
+        if (userData.username() == null || userData.password() == null || userData.email() == null ) {
             throw new DataAccessExceptionHTTP(400,"Error: bad request");
         }
-            User isDuplicated = dataAccess.getUser(user.getUsername());
+            UserData isDuplicated = dataAccess.getUser(userData.username());
         if (isDuplicated != null) {
             throw new DataAccessExceptionHTTP(403,"Error: already taken");
         }
-        boolean userCreated = dataAccess.addUser(user);
+        boolean userCreated = dataAccess.addUser(userData);
 
         if (!userCreated) {
             throw new DataAccessExceptionHTTP(500,"Error: user could not be created. Try again");
         }
-        return dataAccess.createAuthData(user.getUsername());
+        return dataAccess.createAuthData(userData.username());
     }
 
-    public authData login(LoginRequest user) throws DataAccessExceptionHTTP {
+    public AuthData login(LoginRequest user) throws DataAccessExceptionHTTP {
         try {
-            if(user.getUsername() == null || user.getPassword() == null) {
+            if(user.username() == null || user.password() == null) {
                 throw new DataAccessException("Error: bad request");
             }
-            User isRegisteredUser = dataAccess.getUser(user.getUsername());
-            if( isRegisteredUser != null) {
-                LoginRequest loginRequestObject = new LoginRequest(isRegisteredUser.getUsername(), isRegisteredUser.getPassword());
+            UserData isRegisteredUserData = dataAccess.getUser(user.username());
+            if( isRegisteredUserData != null) {
+                LoginRequest loginRequestObject = new LoginRequest(isRegisteredUserData.username(), isRegisteredUserData.password());
                 if (loginRequestObject.equals(user)) {
-                    return dataAccess.createAuthData(user.getUsername());
+                    return dataAccess.createAuthData(user.username());
                 }
             }
             throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
@@ -54,13 +53,13 @@ public class AppService {
         }
     }
 
-    public Game createGame(GameRequest gameRequest) throws DataAccessExceptionHTTP {
+    public GameData createGame(GameRequest gameRequest) throws DataAccessExceptionHTTP {
         try {
-            boolean isTokenValid = dataAccess.isValidAuthToken(gameRequest.getAuthToken());
+            boolean isTokenValid = dataAccess.isValidAuthToken(gameRequest.authToken());
             if (!isTokenValid) {
                 throw new DataAccessExceptionHTTP(401, "Error: unauthorized");
             }
-            return dataAccess.createGame(new Game(null, null, gameRequest.getGameName()));
+            return dataAccess.createGame(new GameData(null, null, gameRequest.gameName()));
         } catch (DataAccessExceptionHTTP e) {
             throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
@@ -70,36 +69,37 @@ public class AppService {
 
     public void joinGame(JoinGameRequest joinGameRequestData) throws DataAccessExceptionHTTP {
         try{
-            boolean isTokenValid = dataAccess.isValidAuthToken(joinGameRequestData.getAuthToken());
+            boolean isTokenValid = dataAccess.isValidAuthToken(joinGameRequestData.authToken());
             if(!isTokenValid){
                 throw new DataAccessExceptionHTTP(401,"Error: unauthorized");
             }
-            Game gameData = dataAccess.getGameData(joinGameRequestData.getGameId());
+            GameData gameData = dataAccess.getGameData(joinGameRequestData.gameID());
 
             if(gameData == null){
                 throw new DataAccessExceptionHTTP(400,"Error: bad request");
             }
             List<String> playableColors = List.of("WHITE","BLACK");
-            if(!playableColors.contains(joinGameRequestData.getPlayerColor()) ){
+            if(!playableColors.contains(joinGameRequestData.playerColor()) ){
                 throw new DataAccessExceptionHTTP(400,"Error: bad request");
             }
-            boolean isWhiteTeamAvailable = gameData.getWhiteUsername() == null;
-            boolean isBlackTeamAvailable = gameData.getBlackUsername() == null;
+            boolean isWhiteTeamAvailable = gameData.whiteUsername() == null;
+            boolean isBlackTeamAvailable = gameData.blackUsername() == null;
             Map<String,Boolean> IsTeamAvailable = new HashMap<>();
             IsTeamAvailable.put("WHITE",isWhiteTeamAvailable);
             IsTeamAvailable.put("BLACK",isBlackTeamAvailable);
-            if(!IsTeamAvailable.get(joinGameRequestData.getPlayerColor())){
+            if(!IsTeamAvailable.get(joinGameRequestData.playerColor())){
                 throw new DataAccessExceptionHTTP(403,"Error: already taken");
             }
-             String usernameRequestingToJoin = dataAccess.getAuthData(joinGameRequestData.getAuthToken()).getUsername();
-             Game gameToUpdate = dataAccess.getGameData(joinGameRequestData.getGameId());
-             if(joinGameRequestData.getPlayerColor().equalsIgnoreCase("WHITE")){
-                 gameToUpdate.setWhiteUsername(usernameRequestingToJoin);
+             String usernameRequestingToJoin = dataAccess.getAuthData(joinGameRequestData.authToken()).username();
+             GameData gameDataToUpdate = dataAccess.getGameData(joinGameRequestData.gameID());
+            GameData updatedGameData = null;
+             if(joinGameRequestData.playerColor().equalsIgnoreCase("WHITE")){
+                  updatedGameData = gameDataToUpdate.setWhiteUsername(usernameRequestingToJoin);
              }
              else {
-                 gameToUpdate.setBlackUsername(usernameRequestingToJoin);
+                  updatedGameData = gameDataToUpdate.setBlackUsername(usernameRequestingToJoin);
              }
-               dataAccess.updateGame(gameToUpdate);
+               dataAccess.updateGame(updatedGameData);
         } catch (DataAccessExceptionHTTP e) {
             throw new DataAccessExceptionHTTP(e.getStatusCode(),e.getMessage());
         }

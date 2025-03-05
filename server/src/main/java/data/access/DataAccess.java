@@ -1,9 +1,9 @@
 package data.access;
 
-import model.Game;
+import model.GameData;
 import model.GameListData;
-import model.User;
-import model.authData;
+import model.UserData;
+import model.AuthData;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ public interface DataAccess {
 
     /**
      * This function add a new user to the memory
-     * @param user of type User
+     * @param userData of type User
      * @return boolean value to indicate success.
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    boolean addUser(User user) throws DataAccessExceptionHTTP;
+    boolean addUser(UserData userData) throws DataAccessExceptionHTTP;
 
     /**
      * Function user to get user information
@@ -23,7 +23,7 @@ public interface DataAccess {
      * @return user associated to information given.
      * @throws DataAccessExceptionHTTP in case of any errors
      */
-    User getUser(String username) throws DataAccessExceptionHTTP;
+    UserData getUser(String username) throws DataAccessExceptionHTTP;
 
     /**
      * Function user to return authData from a user
@@ -31,7 +31,7 @@ public interface DataAccess {
      * @return authToken associated to given user.
      * @throws DataAccessExceptionHTTP is any error occurs
      */
-    authData getAuthData(String authData)  throws DataAccessExceptionHTTP;
+    AuthData getAuthData(String authData)  throws DataAccessExceptionHTTP;
 
     /**
      * Function to verify authToken
@@ -47,7 +47,7 @@ public interface DataAccess {
      * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    authData createAuthData(String username) throws DataAccessExceptionHTTP;
+    AuthData createAuthData(String username) throws DataAccessExceptionHTTP;
 
 
     /**
@@ -61,18 +61,18 @@ public interface DataAccess {
     /**
      * Function to update chess game.
      *
-     * @param game of type String. This parameter is used to extract the gameId and update the information passed in the corresponding gameId
+     * @param gameData of type String. This parameter is used to extract the gameId and update the information passed in the corresponding gameId
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    void updateGame(Game game) throws DataAccessExceptionHTTP;
+    void updateGame(GameData gameData) throws DataAccessExceptionHTTP;
 
     /**
      *Function to create a chess game.
-     * @param game of type Game.
+     * @param gameData of type Game.
      * @return boolean value
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    Game createGame(Game game ) throws DataAccessExceptionHTTP;
+    GameData createGame(GameData gameData) throws DataAccessExceptionHTTP;
 
 
     /**
@@ -81,7 +81,7 @@ public interface DataAccess {
      * @return game
      * @throws DataAccessExceptionHTTP in case of any error
      */
-    Game getGameData(int gameId) throws DataAccessExceptionHTTP;
+    GameData getGameData(int gameId) throws DataAccessExceptionHTTP;
 
     /**
      *Function to return list of games in memory

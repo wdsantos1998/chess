@@ -12,6 +12,7 @@ public class GameListData {
         this.blackUsername = blackUsername;
         this.gameName = gameName;
     }
+    //
 
     public int getGameID() {
         return gameID;
