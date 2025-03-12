@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public record AuthData(String username, String authToken) {
     public AuthData(String username) {
-        this(username, UUID.randomUUID()+ username);
+        this(username, UUID.randomUUID().toString() + username);
     }
-    //Just to commit something 3
 }
