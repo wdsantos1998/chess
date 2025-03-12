@@ -2,6 +2,7 @@ package server;
 
 import controller.AppHandler;
 import data.access.MemoryDataAccess;
+import data.access.MySqlDataAccess;
 import service.AppService;
 import spark.*;
 
@@ -15,7 +16,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        AppHandler userHandler = new AppHandler(new AppService(new MemoryDataAccess()));
+        AppHandler userHandler = new AppHandler(new AppService(new MySqlDataAccess()));
         userHandler.startRoutes();
 
         // Handle unhandled exceptions
