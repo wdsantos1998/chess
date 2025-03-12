@@ -33,7 +33,7 @@ public class DatabaseManager {
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
                 CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
-                String relativePath = "data/database_files";
+                String relativePath = "server/src/main/java/data/database_files";
                 SQL_FOLDER = new File(relativePath).getAbsoluteFile();
             }
         } catch (Exception ex) {
@@ -72,12 +72,14 @@ public class DatabaseManager {
 
         try (Connection conn = getConnection()) {
             System.out.println("Connected to database: " + DATABASE_NAME);
-
             for (File file : files) {
                 System.out.println("Executing: " + file.getName());
                 String sqlScript = new String(Files.readAllBytes(file.toPath()));
                 try (var preparedStatement = conn.prepareStatement(sqlScript)) {
                     preparedStatement.executeUpdate();
+                }
+                catch (SQLException e){
+                    throw new DataAccessExceptionHTTP(500,"Error " + file.getName()+": "+e.getMessage());
                 }
             }
 
