@@ -5,15 +5,18 @@ import model.GameData;
 import model.GameListData;
 import model.UserData;
 
+import java.sql.SQLException;
 import java.util.List;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements DataAccess {
-    public MySqlDataAccess() throws DataAccessExceptionHTTP {
+    public MySqlDataAccess() {
         try {
             configureDatabase();
         }
         catch (DataAccessExceptionHTTP e){
-            throw new DataAccessExceptionHTTP(e.getStatusCode(),e.getMessage());
+           System.out.println("Error: "+e.getMessage());
         }
 
     }
@@ -73,12 +76,10 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     private void configureDatabase() throws DataAccessExceptionHTTP{
-        DatabaseManager.createDatabase();
         try  {
-            //Creating tables
-            DatabaseManager.createDataBaseTables();
+            DatabaseManager.createDatabase();
         }
-        catch (DataAccessExceptionHTTP e){
+        catch (DataAccessExceptionHTTP e) {
             throw new DataAccessExceptionHTTP(500, "Error: Unable to configure database");
         }
     }
