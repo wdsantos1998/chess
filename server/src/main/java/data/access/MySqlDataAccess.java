@@ -1,9 +1,13 @@
 package data.access;
+import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
@@ -13,6 +17,7 @@ public class MySqlDataAccess implements DataAccess {
     private final String GAME_DATA_TABLE = "game_data";
     private final String AUTH_TOKEN_TABLE = "auth_token";
     private final String[] TABLES = {USER_TABLE,GAME_DATA_TABLE,AUTH_TOKEN_TABLE};
+    private static final Gson gson = new Gson();
 
     public MySqlDataAccess() {
         try {
@@ -103,30 +108,69 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void updateGame(GameData gameData) throws DataAccessExceptionHTTP {
-
+        int gameID = gameData.gameID();
+        var statement = "DELETE FROM game_data WHERE gameID=?";
+        //Deleting current information
+        executeUpdate(statement, gameID);
+        //Inserting new record with update information
+        createGame(gameData);
     }
 
     @Override
     public GameData createGame(GameData gameData) throws DataAccessExceptionHTTP {
-        return null;
+        var statement = "INSERT INTO game_data (gameID, whiteUsername,blackUsername,gameName,game) VALUES (?, ?, ?, ?, ?)";
+        executeUpdate(statement,gameData.gameID(),gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(),gson.toJson(gameData.game()));
+        return gameData;
     }
 
     @Override
     public GameData getGameData(int gameId) throws DataAccessExceptionHTTP {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, whiteUsername,blackUsername,gameName, game FROM game_data WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameId);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGameData(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
-    private AuthData readAuthData(ResultSet rs) throws SQLException {
-        var username = rs.getString("username");
-        var authToken = rs.getString("authToken");
-        return new AuthData(username, authToken);
+    private GameData readGameData(ResultSet rs) throws SQLException {
+        var gameID = rs.getInt("gameID");
+        var whiteUsername = rs.getString("whiteUsername");
+        var blackUsername = rs.getString("blackUsername");
+        var gameName = rs.getString("gameName");
+        var gameJson = rs.getString("game");
+        ChessGame game = gson.fromJson(gameJson, ChessGame.class);
+        return new GameData(whiteUsername,blackUsername,gameName,gameID,game);
     }
 
 
 
     @Override
     public List<GameListData> listGames() throws DataAccessExceptionHTTP {
-        return List.of();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM game_data";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    List<GameListData> gameDataList = new ArrayList<>();
+                    while (rs.next()) {
+                        GameData gameDataFromDatabase = readGameData(rs);
+                        GameListData gameListData = new GameListData(gameDataFromDatabase.gameID(),gameDataFromDatabase.whiteUsername(),gameDataFromDatabase.blackUsername(),gameDataFromDatabase.gameName());
+                        gameDataList.add(gameListData);
+                    }
+                    return gameDataList;
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
     }
 
     @Override
