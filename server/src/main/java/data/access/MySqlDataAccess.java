@@ -224,10 +224,10 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    private String hashPassword(String password){
+    public String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
-    private Boolean verifyPassword(String clearPassword, String hashedPassword){
+    public Boolean verifyPassword(String clearPassword, String hashedPassword){
         return BCrypt.checkpw(clearPassword, hashedPassword);
     }
 }
