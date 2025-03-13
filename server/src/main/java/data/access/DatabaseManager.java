@@ -14,6 +14,9 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
     private static final File SQL_FOLDER;
+//    private static final File USER_TALBE;
+//    private static final File GAME_DATA_TABLE;
+//    private static final File AUTH_TOKEN_TABLE;
 
     /*
      * Load the database information for the db.properties file.
@@ -33,8 +36,11 @@ public class DatabaseManager {
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
                 CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
-                String relativePath = "src/main/java/data/database_files";
-                SQL_FOLDER = new File(relativePath).getAbsoluteFile();
+//                USER_TALBE = new File(Thread.currentThread().getContextClassLoader().getResource("database_files/users.sql").toURI());
+                SQL_FOLDER = new File(Thread.currentThread().getContextClassLoader().getResource("database_files").toURI());
+//                GAME_DATA_TABLE = new File(Thread.currentThread().getContextClassLoader().getResource("database_files/game_data.sql").toURI());
+//                AUTH_TOKEN_TABLE = new File(Thread.currentThread().getContextClassLoader().getResource("database_files/auth_token.sql").toURI());
+
             }
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
