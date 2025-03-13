@@ -13,7 +13,7 @@ import java.util.Map;
 import static spark.Spark.*;
 
 public class AppHandler {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     private final AppService appService;
 
     public AppHandler(AppService appService) {
@@ -23,41 +23,41 @@ public class AppHandler {
     public void startRoutes() {
         post("/user", (req, res) -> {
             try {
-                UserData userData = gson.fromJson(req.body(), UserData.class);
+                UserData userData = GSON.fromJson(req.body(), UserData.class);
                 try {
                     AuthData response = appService.register(userData);
                     res.status(200);
-                    return gson.toJson(response);
+                    return GSON.toJson(response);
                 } catch (DataAccessExceptionHTTP e) {
                     res.status(e.getStatusCode());
-                    return gson.toJson(Map.of(
+                    return GSON.toJson(Map.of(
                             "message", e.getMessage()
                     ));
                 }
             } catch (JsonSyntaxException e) {
                 res.status(400);
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "error", "Invalid JSON",
                         "message", "Malformed request body"
                 ));
             }
         });
         post("/session", (req, res) -> {
-            LoginRequest loginRequestData = gson.fromJson(req.body(), LoginRequest.class);
+            LoginRequest loginRequestData = GSON.fromJson(req.body(), LoginRequest.class);
             try {
                 AuthData response = appService.login(loginRequestData);
                 res.status(200);
-                return gson.toJson(response);
+                return GSON.toJson(response);
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "message", e.getMessage()
                 ));
             }
         });
         post("/game", (req, res) -> {
             try {
-            String gameName = gson.fromJson(req.body(), JsonObject.class).get("gameName").getAsString();
+            String gameName = GSON.fromJson(req.body(), JsonObject.class).get("gameName").getAsString();
             String authToken = req.headers("authorization");
 
             if(authToken == null || gameName == null){
@@ -66,17 +66,17 @@ public class AppHandler {
                 GameRequest gameRequest = new GameRequest(gameName, authToken);
                 GameData response = appService.createGame(gameRequest);
                 res.status(200);
-                return gson.toJson(Map.of("gameID", response.gameID()));
+                return GSON.toJson(Map.of("gameID", response.gameID()));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "message", e.getMessage()
                 ));
             }
         });
         put("/game", (req, res) -> {
             try {
-                JsonObject requestJsonObject = gson.fromJson(req.body(), JsonObject.class);
+                JsonObject requestJsonObject = GSON.fromJson(req.body(), JsonObject.class);
                 String authToken = req.headers("authorization");
                 if (requestJsonObject == null || !requestJsonObject.has("gameID") || !requestJsonObject.has("playerColor") || authToken == null) {
                     throw new DataAccessExceptionHTTP(400, "Error: bad request");
@@ -88,10 +88,10 @@ public class AppHandler {
                 appService.joinGame(joinGameRequestData);
                 res.status(200);
                 res.type("application/json");
-                return gson.toJson(new Object());
+                return GSON.toJson(new Object());
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "message", e.getMessage()
                 ));
             }
@@ -104,10 +104,10 @@ public class AppHandler {
             }
                 List<GameListData> response =  appService.listGames(authToken);
                 res.status(200);
-                return gson.toJson(Map.of("games", response));
+                return GSON.toJson(Map.of("games", response));
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "message", e.getMessage()
                 ));
             }
@@ -121,10 +121,10 @@ public class AppHandler {
                 appService.logout(authToken);
                 res.status(200);
                 res.type("application/json");
-                return gson.toJson(new Object());
+                return GSON.toJson(new Object());
             } catch (DataAccessExceptionHTTP e) {
                 res.status(e.getStatusCode());
-                return gson.toJson(Map.of(
+                return GSON.toJson(Map.of(
                         "message", e.getMessage()
                 ));
             }
@@ -135,15 +135,15 @@ public class AppHandler {
                     appService.clearApplication();
                     res.status(200);
                     res.type("application/json");
-                    return gson.toJson(new Object());
+                    return GSON.toJson(new Object());
                 } catch (DataAccessExceptionHTTP e) {
                     res.status(e.getStatusCode());
-                    return gson.toJson(e.getMessage());
+                    return GSON.toJson(e.getMessage());
                 }
             }
             catch (Exception e){
                 res.status(500);
-                return gson.toJson(e.getMessage());
+                return GSON.toJson(e.getMessage());
             }
         });
     }
