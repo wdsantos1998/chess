@@ -33,7 +33,7 @@ public class DatabaseManager {
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
                 CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
-                String relativePath = "server/src/main/java/data/database_files";
+                String relativePath = "src/main/java/data/database_files";
                 SQL_FOLDER = new File(relativePath).getAbsoluteFile();
             }
         } catch (Exception ex) {
