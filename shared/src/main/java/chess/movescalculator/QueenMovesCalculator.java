@@ -1,4 +1,4 @@
-package chess.moves_calculator;
+package chess.movescalculator;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -7,7 +7,6 @@ import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class QueenMovesCalculator implements PieceMovesCalculator {
 
@@ -79,11 +78,6 @@ public class QueenMovesCalculator implements PieceMovesCalculator {
     }
 
     @Override
-    public boolean isEnemy(ChessBoard board, ChessPosition myPosition) {
-        return false;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
@@ -99,8 +93,5 @@ public class QueenMovesCalculator implements PieceMovesCalculator {
 
     public void setCapturedPiece(boolean capturedPiece) {
         this.capturedPiece = capturedPiece;
-    }
-    public boolean isSlidingPiece() {
-        return true;
     }
 }

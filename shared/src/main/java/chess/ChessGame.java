@@ -84,7 +84,7 @@ public class ChessGame {
 
     private int[] getKingLocation(ChessGame.TeamColor teamColor) {
         ChessPiece.PieceType king = ChessPiece.PieceType.KING;
-        int [] KingLocation = new int[2];
+        int [] kingLocation = new int[2];
         for(int i = 1; i <= 8; i++){
             for(int j = 1; j <= 8; j++){
                 ChessPosition position = new ChessPosition(i,j);
@@ -93,11 +93,11 @@ public class ChessGame {
                     continue;
                 }
                 if(piece.getPieceType() == king && piece.getTeamColor() == teamColor){
-                    KingLocation = new int[] {i,j};
+                    kingLocation = new int[] {i,j};
                 }
             }
         }
-        return KingLocation;
+        return kingLocation;
     }
 
     /**

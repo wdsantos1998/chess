@@ -220,7 +220,7 @@ public class MySqlDataAccess implements DataAccess {
             DatabaseManager.createDatabase();
         }
         catch (DataAccessExceptionHTTP e) {
-            throw new DataAccessExceptionHTTP(500, "Error: Unable to configure database");
+            throw new DataAccessExceptionHTTP(500, "Error: Unable to configure database "+e.getMessage());
         }
     }
 

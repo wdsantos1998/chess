@@ -41,8 +41,7 @@ public class AppService {
             }
             UserData isRegisteredUserData = dataAccess.getUser(user.username());
             if( isRegisteredUserData != null) {
-                LoginRequest userFromDatabase = new LoginRequest(isRegisteredUserData.username(), isRegisteredUserData.password());
-                if (verifyUser(user,userFromDatabase)) {
+                if (verifyPassword(user.password(),isRegisteredUserData.password())) {
                     return dataAccess.createAuthData(user.username());
                 }
             }
@@ -50,7 +49,7 @@ public class AppService {
         } catch (DataAccessExceptionHTTP e) {
             throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
-            throw new DataAccessExceptionHTTP(500, "Internal Server Error");
+            throw new DataAccessExceptionHTTP(500, e.getMessage());
         }
     }
 
@@ -85,10 +84,10 @@ public class AppService {
             }
             boolean isWhiteTeamAvailable = gameData.whiteUsername() == null;
             boolean isBlackTeamAvailable = gameData.blackUsername() == null;
-            Map<String,Boolean> IsTeamAvailable = new HashMap<>();
-            IsTeamAvailable.put("WHITE",isWhiteTeamAvailable);
-            IsTeamAvailable.put("BLACK",isBlackTeamAvailable);
-            if(!IsTeamAvailable.get(joinGameRequestData.playerColor())){
+            Map<String,Boolean> isTeamAvailable = new HashMap<>();
+            isTeamAvailable.put("WHITE",isWhiteTeamAvailable);
+            isTeamAvailable.put("BLACK",isBlackTeamAvailable);
+            if(!isTeamAvailable.get(joinGameRequestData.playerColor())){
                 throw new DataAccessExceptionHTTP(403,"Error: already taken");
             }
              String usernameRequestingToJoin = dataAccess.getAuthData(joinGameRequestData.authToken()).username();

@@ -1,4 +1,4 @@
-package chess.moves_calculator;
+package chess.movescalculator;
 
 import chess.*;
 
@@ -81,25 +81,12 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         return targetPiece == null || targetPiece.getTeamColor() != getPawnColor(board, myPosition);
     }
 
-    @Override
-    public boolean isEnemy(ChessBoard board, ChessPosition myPosition) {
-        return false;
-    }
-
     private boolean isWithinBoard(ChessPosition position) {
         return position.getRow() >= 1 && position.getRow() <= 8 && position.getColumn() >= 1 && position.getColumn() <= 8;
     }
 
     public ChessGame.TeamColor getPawnColor(ChessBoard board, ChessPosition myPosition) {
         return board.getPiece(myPosition).getTeamColor();
-    }
-
-    public boolean isFirstMove() {
-        return isFirstMove;
-    }
-
-    public void setFirstMove(boolean firstMove) {
-        this.isFirstMove = firstMove;
     }
 
     @Override

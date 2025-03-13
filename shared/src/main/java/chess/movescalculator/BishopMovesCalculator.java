@@ -1,4 +1,4 @@
-package chess.moves_calculator;
+package chess.movescalculator;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -14,10 +14,10 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
 
     private int[][] getBishopMoves() {
         return new int[][]{
-                {-1, -1}, //Diagonal-left (Moving Down)
-                {-1, 1},//Diagonal-right (Moving Down)
-                {1, -1}, //Diagonal-left (Moving Up)
-                {1, 1}, //Diagonal-right (Moving Up)
+                {-1, -1},
+                {-1, 1},
+                {1, -1},
+                {1, 1},
         };
     }
 
@@ -78,11 +78,6 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
     }
 
     @Override
-    public boolean isEnemy(ChessBoard board, ChessPosition myPosition) {
-        return false;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
@@ -98,8 +93,5 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
 
     public void setCapturedPiece(boolean capturedPiece) {
         this.capturedPiece = capturedPiece;
-    }
-    public boolean isSlidingPiece() {
-        return true;
     }
 }

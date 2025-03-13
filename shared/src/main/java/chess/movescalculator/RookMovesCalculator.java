@@ -1,4 +1,4 @@
-package chess.moves_calculator;
+package chess.movescalculator;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -74,12 +74,6 @@ public class RookMovesCalculator implements PieceMovesCalculator {
     private boolean isWithinBoard(ChessPosition targetPosition) {
         return targetPosition.getRow() >= 1 && targetPosition.getRow() <= 8 && targetPosition.getColumn() >= 1 && targetPosition.getColumn() <= 8;
     }
-
-    @Override
-    public boolean isEnemy(ChessBoard board, ChessPosition myPosition) {
-        return false;
-    }
-
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
@@ -98,7 +92,4 @@ public class RookMovesCalculator implements PieceMovesCalculator {
         this.capturedPiece = capturedPiece;
     }
 
-    public boolean isSlidingPiece() {
-        return true;
-    }
 }

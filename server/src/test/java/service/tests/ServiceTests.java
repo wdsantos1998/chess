@@ -39,9 +39,9 @@ public class ServiceTests {
     public void setup() throws DataAccessExceptionHTTP {
         service.clearApplication();
         AuthData regResult = service.register(existingUserData);
-        AuthData regResult_2 = service.register(newUserData);
+        AuthData regResultTwo = service.register(newUserData);
         existingAuth = regResult.authToken();
-        newAuth = regResult_2.authToken();
+        newAuth = regResultTwo.authToken();
         existingGameDataSession = service.createGame(new GameRequest("ExistingGame", existingAuth));
 
     }
@@ -75,7 +75,7 @@ public class ServiceTests {
     @Order(3)
     @DisplayName("Testing login service")
     public void testLogin() throws DataAccessExceptionHTTP {
-        LoginRequest loginRequest = new LoginRequest("ExistingUser", "existingUserPassword");
+        LoginRequest loginRequest = new LoginRequest(existingUserData.username(), existingUserData.password());
 
         AuthData result = service.login(loginRequest);
 
@@ -88,7 +88,7 @@ public class ServiceTests {
     @Order(4)
     @DisplayName("Testing login with incorrect password")
     public void testLoginWithIncorrectPassword() {
-        LoginRequest loginRequest = new LoginRequest("ExistingUser", "wrongPassword");
+        LoginRequest loginRequest = new LoginRequest(existingUserData.username(), existingUserData.password());
 
         DataAccessExceptionHTTP exception = assertThrows(DataAccessExceptionHTTP.class, () -> {
             service.login(loginRequest);

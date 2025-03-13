@@ -1,4 +1,4 @@
-package chess.moves_calculator;
+package chess.movescalculator;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -8,23 +8,27 @@ import chess.ChessPosition;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KnightMovesCalculator implements PieceMovesCalculator {
+public class KingMovesCalculator implements PieceMovesCalculator {
 
-    private int[][] getKnightMoves() {
-        return new int[][] {
-                {1,2},{1,-2},
-                {-1,2},{-1,-2},
-                {2,1},{2,-1},
-                {-2,1},{-2,-1}
+    private int[][] getKingMoves() {
+        return new int[][]{
+                {-1, -1},
+                {-1, 0},
+                {-1, 1},
+                {0, -1},
+                {0, 1},
+                {1, -1},
+                {1, 0},
+                {1, 1},
         };
     }
 
     @Override
     public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition myPosition) {
-        int[][] knightMoves = getKnightMoves();
+        int[][] kingMoves = getKingMoves();
         Collection<ChessMove> validMoves = new ArrayList<>();
 
-        for (int[] move : knightMoves) {
+        for (int[] move : kingMoves) {
             int newRow = myPosition.getRow() + move[0];
             int newCol = myPosition.getColumn() + move[1];
             ChessPosition newPos = new ChessPosition(newRow, newCol);
@@ -51,12 +55,8 @@ public class KnightMovesCalculator implements PieceMovesCalculator {
         else if (myPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
             return false;
         }
-        return true;
-    }
 
-    @Override
-    public boolean isEnemy(ChessBoard board, ChessPosition myPosition) {
-        return false;
+        return true;
     }
 
     private boolean isWithinBoard(ChessPosition targetPosition) {
