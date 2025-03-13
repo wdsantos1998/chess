@@ -1,6 +1,7 @@
 package data.access;
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -108,11 +109,10 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public void updateGame(GameData gameData) throws DataAccessExceptionHTTP {
         int gameID = gameData.gameID();
-        var statement = "DELETE FROM game_data WHERE gameID=?";
-        //Deleting current information
-        executeUpdate(statement, gameID);
+        //Updating current information
+        var statement = "UPDATE game_data SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
         //Inserting new record with update information
-        createGame(gameData);
+        executeUpdate(statement, gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(), gameData.game(), gameID);
     }
 
     @Override
@@ -196,6 +196,7 @@ public class MySqlDataAccess implements DataAccess {
                         case UserData p -> ps.setString(i + 1, p.toString());
                         case GameData p -> ps.setString(i + 1, p.toString());
                         case AuthData p -> ps.setString(i + 1, p.toString());
+                        case ChessGame p -> ps.setString(i + 1, gson.toJson(p));
                         case null -> ps.setNull(i + 1, NULL);
                         default -> {
                         }
