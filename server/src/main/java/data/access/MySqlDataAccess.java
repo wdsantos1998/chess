@@ -1,7 +1,6 @@
 package data.access;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -224,9 +223,21 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
+    /**
+     *This function is used to hash passwords
+     * @param password (String)
+     * @return encrypted password (String)
+     */
+
     public String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+    /**
+     *This function is used to compare the clean password text from the user with the hashed password we stored in the database
+     * @param clearPassword (String)
+     * @param hashedPassword (String)
+     * @return encrypted password (String)
+     */
     public Boolean verifyPassword(String clearPassword, String hashedPassword){
         return BCrypt.checkpw(clearPassword, hashedPassword);
     }
