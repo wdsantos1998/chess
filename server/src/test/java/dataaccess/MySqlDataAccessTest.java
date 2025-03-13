@@ -57,4 +57,24 @@ public class MySqlDataAccessTest {
         Assertions.assertFalse(database.verifyPassword(existingUserData.password().toUpperCase(), userInDatabase.password()),
                 "Passwords shouldn't match");
     }
+
+    @Test
+    @Order(3)
+    @DisplayName("Get user")
+    public void getUser() throws DataAccessExceptionHTTP {
+        database.addUser(newUserData);
+        UserData userInDatabase = database.getUser(newUserData.username());
+        Assertions.assertNotNull(userInDatabase, "Database did not find a record.");
+        Assertions.assertTrue(database.verifyPassword(newUserData.password(), userInDatabase.password()),
+                "Passwords don't match");
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Get user with typo in username")
+    public void getUsernameWithTypo() throws DataAccessExceptionHTTP {
+        database.addUser(newUserData);
+        UserData userInDatabase = database.getUser("brandNewUserError");
+        Assertions.assertNull(userInDatabase, "Database did find a record.");
+    }
 }
