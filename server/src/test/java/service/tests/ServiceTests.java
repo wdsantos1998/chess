@@ -2,6 +2,7 @@ package service.tests;
 
 import data.access.DataAccessExceptionHTTP;
 import data.access.MemoryDataAccess;
+import data.access.MySqlDataAccess;
 import model.*;
 import org.junit.jupiter.api.*;
 import service.AppService;
@@ -30,7 +31,7 @@ public class ServiceTests {
 
     @BeforeAll
     public static void init() {
-        service = new AppService(new MemoryDataAccess());
+        service = new AppService(new MySqlDataAccess());
         existingUserData = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
         newUserData = new UserData("brandNewUser", "newUserPassword", "nu@mail.com");
     }
@@ -88,7 +89,8 @@ public class ServiceTests {
     @Order(4)
     @DisplayName("Testing login with incorrect password")
     public void testLoginWithIncorrectPassword() {
-        LoginRequest loginRequest = new LoginRequest(existingUserData.username(), existingUserData.password());
+        String fakePassword = "123asdajbfabfjabskanlfas";
+        LoginRequest loginRequest = new LoginRequest(existingUserData.username(), fakePassword);
 
         DataAccessExceptionHTTP exception = assertThrows(DataAccessExceptionHTTP.class, () -> {
             service.login(loginRequest);
