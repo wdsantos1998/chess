@@ -3,6 +3,7 @@ import data.access.DataAccess;
 import data.access.DataAccessException;
 import data.access.DataAccessExceptionHTTP;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +41,8 @@ public class AppService {
             }
             UserData isRegisteredUserData = dataAccess.getUser(user.username());
             if( isRegisteredUserData != null) {
-                LoginRequest loginRequestObject = new LoginRequest(isRegisteredUserData.username(), isRegisteredUserData.password());
-                if (loginRequestObject.equals(user)) {
+                LoginRequest userFromDatabase = new LoginRequest(isRegisteredUserData.username(), isRegisteredUserData.password());
+                if (verifyUser(user,userFromDatabase)) {
                     return dataAccess.createAuthData(user.username());
                 }
             }
@@ -149,5 +150,11 @@ public class AppService {
             throw new DataAccessExceptionHTTP(e.getStatusCode(), e.getMessage());
         }
     }
+    private Boolean verifyPassword(String clearPassword, String hashedPassword){
+        return BCrypt.checkpw(clearPassword, hashedPassword);
+    }
 
+    private Boolean verifyUser(LoginRequest userA, LoginRequest userB){
+       return userA.username().equals(userB.username()) && verifyPassword(userA.password(),userB.password());
+    }
 }
