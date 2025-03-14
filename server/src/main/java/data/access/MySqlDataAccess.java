@@ -1,7 +1,6 @@
 package data.access;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -13,11 +12,11 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements DataAccess {
-    private final String USER_TABLE = "users";
-    private final String GAME_DATA_TABLE = "game_data";
-    private final String AUTH_TOKEN_TABLE = "auth_token";
-    private final String[] TABLES = {USER_TABLE,GAME_DATA_TABLE,AUTH_TOKEN_TABLE};
-    private static final Gson gson = new Gson();
+    static final String USER_TABLE = "users";
+    static final String GAME_DATA_TABLE = "game_data";
+    static final String AUTH_TOKEN_TABLE = "auth_token";
+    static final String[] TABLES = {USER_TABLE,GAME_DATA_TABLE,AUTH_TOKEN_TABLE};
+    private static final Gson GSON = new Gson();
 
     public MySqlDataAccess() {
         try {
@@ -118,7 +117,7 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public GameData createGame(GameData gameData) throws DataAccessExceptionHTTP {
         var statement = "INSERT INTO game_data (gameID, whiteUsername,blackUsername,gameName,game) VALUES (?, ?, ?, ?, ?)";
-        executeUpdate(statement,gameData.gameID(),gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(),gson.toJson(gameData.game()));
+        executeUpdate(statement,gameData.gameID(),gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(), GSON.toJson(gameData.game()));
         return gameData;
     }
 
@@ -146,7 +145,7 @@ public class MySqlDataAccess implements DataAccess {
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
         var gameJson = rs.getString("game");
-        ChessGame game = gson.fromJson(gameJson, ChessGame.class);
+        ChessGame game = GSON.fromJson(gameJson, ChessGame.class);
         return new GameData(whiteUsername,blackUsername,gameName,gameID,game);
     }
 
@@ -196,7 +195,7 @@ public class MySqlDataAccess implements DataAccess {
                         case UserData p -> ps.setString(i + 1, p.toString());
                         case GameData p -> ps.setString(i + 1, p.toString());
                         case AuthData p -> ps.setString(i + 1, p.toString());
-                        case ChessGame p -> ps.setString(i + 1, gson.toJson(p));
+                        case ChessGame p -> ps.setString(i + 1, GSON.toJson(p));
                         case null -> ps.setNull(i + 1, NULL);
                         default -> {
                         }
