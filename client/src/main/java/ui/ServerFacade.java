@@ -4,7 +4,10 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
+import model.LoginRequest;
 import model.UserData;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,35 +26,36 @@ public class ServerFacade {
         this.Gson = new Gson();
     }
 
-    public AuthData register(UserData newUser) throws Exception {
+    public AuthData register(UserData newUser) throws ExceptionResponse {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ServerUrl + "/user"))
                 .POST(HttpRequest.BodyPublishers.ofString(Gson.toJson(newUser)))
                 .header("Content-Type", "application/json")
                 .build();
-
-        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            return Gson.fromJson(response.body(), AuthData.class);
-        } else {
-            throw new Exception("Error occurred: " + response.body());
-        }
+        return getAuthData(request);
     }
 
-    public AuthData login(UserData user) throws Exception {
+    public AuthData login(LoginRequest user) throws ExceptionResponse {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ServerUrl + "/session"))
                 .POST(HttpRequest.BodyPublishers.ofString(Gson.toJson(user)))
                 .header("Content-Type", "application/json")
                 .build();
+        return getAuthData(request);
+    }
 
-        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            return Gson.fromJson(response.body(), AuthData.class);
-        } else {
-            throw new Exception("Error occurred: " + response.body());
+    private AuthData getAuthData(HttpRequest request) throws ExceptionResponse {
+        try{
+            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return Gson.fromJson(response.body(), AuthData.class);
+            }
+            else{
+                throw new ExceptionResponse(response.statusCode(), response.body());
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            throw new ExceptionResponse(500, e.getMessage());
         }
     }
 
@@ -96,16 +100,20 @@ public class ServerFacade {
         }
     }
 
-    public void clearData() throws Exception {
+    public void clearData() throws ExceptionResponse {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ServerUrl + "/db"))
                 .DELETE()
                 .header("Content-Type", "application/json")
                 .build();
-
-        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw new Exception("Error occurred: " + response.body());
+        try {
+            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+              throw new ExceptionResponse(response.statusCode(), response.body());
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            throw new ExceptionResponse(500, e.getMessage());
         }
     }
 

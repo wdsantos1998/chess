@@ -2,13 +2,11 @@ package client;
 
 import data.access.DataAccessExceptionHTTP;
 import data.access.MySqlDataAccess;
-import model.AuthData;
-import model.GameData;
-import model.GameRequest;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.AppService;
+import ui.ExceptionResponse;
 import ui.ServerFacade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,24 +47,39 @@ public class ServerFacadeTests {
         existingAuth = regResult.authToken();
         existingGameDataSession = facade.createGame("ExistingGame", existingAuth);
     }
-
     @Test
     @Order(1)
+    @DisplayName("Testing clearDB")
+    public void testClearDB() throws ExceptionResponse {
+        AuthData newUserAuth = facade.register(newUserData);
+        Assertions.assertNotNull(newUserAuth);
+        Assertions.assertEquals(newUserData.username(), newUserAuth.username());
+        Assertions.assertNotNull(newUserAuth.authToken());
+        facade.clearData();
+        ExceptionResponse exception = assertThrows(ExceptionResponse.class, () -> {
+            facade.login(new LoginRequest(newUserData.username(), newUserData.password()));
+        });
+        Assertions.assertEquals(401, exception.getStatusCode());
+        Assertions.assertTrue(exception.getMessage().contains("Error: unauthorized"), exception.getMessage());
+    }
+
+    @Test
+    @Order(2)
     @DisplayName("Testing register")
-    public void testRegister() throws Exception {
+    public void testRegister() throws ExceptionResponse {
        AuthData newUserAuth = facade.register(newUserData);
        Assertions.assertNotNull(newUserAuth);
        Assertions.assertEquals(newUserData.username(), newUserAuth.username());
        Assertions.assertNotNull(newUserAuth.authToken());
     }
     @Test
-    @Order(2)
+    @Order(3)
     @DisplayName("Testing register with already existing user")
-    public void testRegisterExistingUser() throws Exception {
-        Exception exception = assertThrows(Exception.class, () -> {
+    public void testRegisterExistingUser() throws ExceptionResponse {
+        ExceptionResponse exception = assertThrows(ExceptionResponse.class, () -> {
             facade.register(existingUserData);
         });
-        assertEquals("Error: already taken", exception.getMessage());
+        Assertions.assertEquals(403, exception.getStatusCode());
+        Assertions.assertTrue(exception.getMessage().contains("Error: already taken"), exception.getMessage());
     }
-
 }
