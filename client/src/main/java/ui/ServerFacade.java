@@ -16,6 +16,7 @@ public class ServerFacade {
     private static HttpClient HttpClient;
     private Gson Gson;
 
+
     public ServerFacade(String URLrequest ){
         this.ServerUrl = URLrequest;
         this.HttpClient = HttpClient.newHttpClient();
@@ -77,29 +78,29 @@ public class ServerFacade {
             }
     }
 
-//    public String joinGame(String playerColor, int gameID, String authToken) throws Exception {
-//        HttpRequest request = HttpRequest.newBuilder()
-//                .uri(URI.create(ServerUrl + "/game"))
-//                .PUT(HttpRequest.BodyPublishers.ofString(Gson.toJson(Map.of("gameID", gameID, "playerColor", playerColor))))
-//                .header("Content-Type", "application/json")
-//                .header("Authorization", authToken)
-//                .build();
-//
-//        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-//
-//        if (response.statusCode() == 200) {
-//           return response.body();
-//        }
-//        else{
-//            throw new Exception("Error occurred: " + response.body());
-//        }
-//    }
-
-    public void clearData(AuthData authData) throws Exception {
+    public String joinGame(String playerColor, int gameID, String authToken) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ServerUrl + "/session"))
+                .uri(URI.create(ServerUrl + "/game"))
+                .PUT(HttpRequest.BodyPublishers.ofString(Gson.toJson(Map.of("gameID", gameID, "playerColor", playerColor))))
+                .header("Content-Type", "application/json")
+                .header("Authorization", authToken)
+                .build();
+
+        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+           return response.body();
+        }
+        else{
+            throw new Exception("Error occurred: " + response.body());
+        }
+    }
+
+    public void clearData() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ServerUrl + "/db"))
                 .DELETE()
-                .header("Content-Type", "application/json").header("Authorization", authData.authToken())
+                .header("Content-Type", "application/json")
                 .build();
 
         HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
