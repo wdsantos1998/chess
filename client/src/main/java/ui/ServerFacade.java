@@ -5,8 +5,6 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-
-import java.lang.classfile.instruction.ReturnInstruction;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -77,6 +75,37 @@ public class ServerFacade {
             else{
                 throw new Exception("Error occurred: " + response.body());
             }
+    }
+
+//    public String joinGame(String playerColor, int gameID, String authToken) throws Exception {
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .uri(URI.create(ServerUrl + "/game"))
+//                .PUT(HttpRequest.BodyPublishers.ofString(Gson.toJson(Map.of("gameID", gameID, "playerColor", playerColor))))
+//                .header("Content-Type", "application/json")
+//                .header("Authorization", authToken)
+//                .build();
+//
+//        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//
+//        if (response.statusCode() == 200) {
+//           return response.body();
+//        }
+//        else{
+//            throw new Exception("Error occurred: " + response.body());
+//        }
+//    }
+
+    public void clearData(AuthData authData) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ServerUrl + "/session"))
+                .DELETE()
+                .header("Content-Type", "application/json").header("Authorization", authData.authToken())
+                .build();
+
+        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new Exception("Error occurred: " + response.body());
+        }
     }
 
 }
