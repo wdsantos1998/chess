@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -68,14 +69,14 @@ public class ServerFacade {
 
         if (response.statusCode() == 200) {
             String responseBody = response.body();
-            Map<String, Object> jsonMap = Gson.from(responseBody, Map.class);
-            Double gameIdDouble = (Double) jsonMap.get("gameID");  // Gson parses numbers as Double
+            Map<String, Object> jsonMap = Gson.fromJson(responseBody, Map.class);
+            Double gameIdDouble = (Double) jsonMap.get("gameID");
             int gameID = gameIdDouble.intValue();
-
+            return new GameData(null, null, gameName, gameID, new ChessGame());
         }
             else{
                 throw new Exception("Error occurred: " + response.body());
             }
-        }
     }
+
 }
