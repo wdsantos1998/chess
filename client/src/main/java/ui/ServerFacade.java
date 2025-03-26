@@ -2,10 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
-import model.GameData;
-import model.LoginRequest;
-import model.UserData;
+import model.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,9 +12,9 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 public class ServerFacade {
-    private String ServerUrl;
+    private final String ServerUrl;
     private static HttpClient HttpClient;
-    private Gson Gson;
+    private final Gson Gson;
 
 
     public ServerFacade(String URLrequest ){
@@ -44,6 +41,28 @@ public class ServerFacade {
         return getAuthData(request);
     }
 
+    public void logout(String authToken) throws ExceptionResponse {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ServerUrl + "/session"))
+                .DELETE()
+                .header("Content-Type", "application/json")
+                .header("Authorization", authToken)
+                .build();
+        voidFunctionValidation(request);
+    }
+
+    private void voidFunctionValidation(HttpRequest request) throws ExceptionResponse {
+        try {
+            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new ExceptionResponse(response.statusCode(), response.body());
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
+
     private AuthData getAuthData(HttpRequest request) throws ExceptionResponse {
         try{
             HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -59,7 +78,7 @@ public class ServerFacade {
         }
     }
 
-    public GameData createGame(String gameName, String authToken) throws Exception {
+    public GameData createGame(String gameName, String authToken) throws ExceptionResponse {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ServerUrl + "/game"))
@@ -67,37 +86,35 @@ public class ServerFacade {
                 .header("Content-Type", "application/json")
                 .header("Authorization", authToken)
                 .build();
+        try {
+            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            String responseBody = response.body();
-            Map<String, Object> jsonMap = Gson.fromJson(responseBody, Map.class);
-            Double gameIdDouble = (Double) jsonMap.get("gameID");
-            int gameID = gameIdDouble.intValue();
-            return new GameData(null, null, gameName, gameID, new ChessGame());
-        }
-            else{
-                throw new Exception("Error occurred: " + response.body());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+                //Numeric values in JSON are by default Doubles. So, that's why I am casting it to Double and then to int
+                Map jsonMap = Gson.fromJson(responseBody, Map.class);
+                Double gameIdDouble = (Double) jsonMap.get("gameID");
+                int gameID = gameIdDouble.intValue();
+                return new GameData(null, null, gameName, gameID, new ChessGame());
             }
+            else{
+                throw new ExceptionResponse(response.statusCode(), response.body());
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
     }
 
-    public String joinGame(String playerColor, int gameID, String authToken) throws Exception {
+    public void joinGame(JoinGameRequest joinGameRequest) throws ExceptionResponse {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ServerUrl + "/game"))
-                .PUT(HttpRequest.BodyPublishers.ofString(Gson.toJson(Map.of("gameID", gameID, "playerColor", playerColor))))
+                .PUT(HttpRequest.BodyPublishers.ofString(Gson.toJson(Map.of("gameID", joinGameRequest.gameID(), "playerColor", joinGameRequest.playerColor())))
+                )
                 .header("Content-Type", "application/json")
-                .header("Authorization", authToken)
+                .header("Authorization", joinGameRequest.authToken())
                 .build();
-
-        HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-           return response.body();
-        }
-        else{
-            throw new Exception("Error occurred: " + response.body());
-        }
+        voidFunctionValidation(request);
     }
 
     public void clearData() throws ExceptionResponse {
@@ -106,15 +123,9 @@ public class ServerFacade {
                 .DELETE()
                 .header("Content-Type", "application/json")
                 .build();
-        try {
-            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-              throw new ExceptionResponse(response.statusCode(), response.body());
-            }
-        }
-        catch (IOException | InterruptedException e) {
-            throw new ExceptionResponse(500, e.getMessage());
-        }
+        voidFunctionValidation(request);
     }
+
+
 
 }
