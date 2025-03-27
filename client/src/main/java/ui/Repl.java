@@ -1,5 +1,4 @@
 package ui;
-import chess.ChessPosition;
 import model.GameData;
 import model.LoginRequest;
 import model.UserData;
@@ -126,23 +125,6 @@ public class Repl {
                 }
             catch (Exception e) {
                 System.out.println(e.getMessage());
-            }
-        }
-
-        public ChessPosition parseChessPosition(String input) {
-            if (input.length() != 2) {
-                return null; // Invalid input format, return null
-            }
-
-            char colChar = Character.toLowerCase(input.charAt(0));
-            int col = colChar - 'a';
-            int row = Character.getNumericValue(input.charAt(1)) - 1;
-
-            // Check if the row and column values are within the valid range
-            if (col >= 0 && col <= 7 && row >= 0 && row <= 7) {
-                return new ChessPosition(row, col);
-            } else {
-                return null;
             }
         }
 
