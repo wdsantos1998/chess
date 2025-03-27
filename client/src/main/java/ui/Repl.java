@@ -18,12 +18,15 @@ public class Repl {
             isLoggedIn = false;
             isInAGame = false;
         }
-
         public void run() throws Exception {
             System.out.println("Welcome to Chess!");
             processCommand("help");
             String input;
             while (true) {
+                if(isInAGame){
+                    PrintChessBoard.printGenericBoard("white");
+                    PrintChessBoard.printGenericBoard("black");
+                }
                 System.out.print("Enter command: ");
                 input = scanner.nextLine();
                 if ("quit".equalsIgnoreCase(input)) {
