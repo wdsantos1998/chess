@@ -129,8 +129,13 @@ public class ServerFacade {
         try {
             HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                Type listType = new TypeToken<List<GameListData>>(){}.getType();
-                return new Gson().fromJson(response.body(), listType);
+                Type responseType = new TypeToken<Map<String, List<GameListData>>>(){}.getType();
+                Map<String, List<GameListData>> parsed = Gson.fromJson(response.body(), responseType);
+                List<GameListData> games = parsed.get("games");
+                if (games == null) {
+                    throw new ExceptionResponse(403, "Error: Invalid format returned from server");
+                }
+                return games;
             }
             else{
                 throw new ExceptionResponse(response.statusCode(), response.body());
