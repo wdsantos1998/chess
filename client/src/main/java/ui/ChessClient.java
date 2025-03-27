@@ -6,26 +6,26 @@ import model.*;
 
 
 public class ChessClient {
-    private final ServerFacade Server;
+    private final ServerFacade server;
     private AuthData userToken;
 
     public ChessClient(String ServerUrl) {
-        Server = new ServerFacade(ServerUrl);
+        server = new ServerFacade(ServerUrl);
     }
 
     public boolean login(LoginRequest loginRequest) throws Exception {
-        this.userToken = Server.login(loginRequest);
+        this.userToken = server.login(loginRequest);
         return this.userToken != null && this.userToken.authToken() != null;
     }
 
     public boolean register(UserData userData) throws Exception {
-        this.userToken = Server.register(userData);
+        this.userToken = server.register(userData);
         return this.userToken != null && this.userToken.authToken() != null;
     }
 
     public List<GameListData> listGames() throws Exception {
         try {
-            return Server.listGames(userToken.authToken());
+            return server.listGames(userToken.authToken());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;
@@ -34,7 +34,7 @@ public class ChessClient {
 
     public void logout() throws Exception {
         try {
-            Server.logout(userToken.authToken());
+            server.logout(userToken.authToken());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -42,7 +42,7 @@ public class ChessClient {
 
     public GameData createGame(String gameName) throws Exception {
         try {
-            return Server.createGame(gameName, userToken.authToken());
+            return server.createGame(gameName, userToken.authToken());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;
@@ -51,7 +51,7 @@ public class ChessClient {
 
     public void joinGame(int gameID, String playerColor) throws Exception {
         try {
-            Server.joinGame(new JoinGameRequest(userToken.authToken(), playerColor, gameID));
+            server.joinGame(new JoinGameRequest(userToken.authToken(), playerColor, gameID));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
