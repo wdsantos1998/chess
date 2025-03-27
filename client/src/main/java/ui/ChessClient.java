@@ -14,21 +14,31 @@ public class ChessClient {
     }
 
     public boolean login(LoginRequest loginRequest) throws Exception {
-        this.userToken = server.login(loginRequest);
-        return this.userToken != null && this.userToken.authToken() != null;
+        try {
+            this.userToken = server.login(loginRequest);
+            return this.userToken != null && this.userToken.authToken() != null;
+        }
+        catch (Exception e) {
+            throw new Exception("Failed to login");
+        }
+
     }
 
     public boolean register(UserData userData) throws Exception {
-        this.userToken = server.register(userData);
-        return this.userToken != null && this.userToken.authToken() != null;
+        try {
+            this.userToken = server.register(userData);
+            return this.userToken != null && this.userToken.authToken() != null;
+        }
+        catch (Exception e) {
+            throw new Exception("Failed to register");
+        }
     }
 
     public List<GameListData> listGames() throws Exception {
         try {
             return server.listGames(userToken.authToken());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
+           throw new Exception("Failed to list games");
         }
     }
 
@@ -37,7 +47,7 @@ public class ChessClient {
             server.logout(userToken.authToken());
             userToken = null;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new Exception("Failed to logout");
         }
     }
 
@@ -45,8 +55,7 @@ public class ChessClient {
         try {
             return server.createGame(gameName, userToken.authToken());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
+            throw new Exception("Failed to create game");
         }
     }
 
@@ -54,7 +63,7 @@ public class ChessClient {
         try {
             server.joinGame(new JoinGameRequest(userToken.authToken(), playerColor, gameID));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new Exception("Failed to join game");
         }
     }
 
