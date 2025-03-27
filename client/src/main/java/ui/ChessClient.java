@@ -35,6 +35,7 @@ public class ChessClient {
     public void logout() throws Exception {
         try {
             server.logout(userToken.authToken());
+            userToken = null;
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
