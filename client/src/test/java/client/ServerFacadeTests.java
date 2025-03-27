@@ -206,5 +206,24 @@ public class ServerFacadeTests {
         Assertions.assertEquals("ExistingGame", games.getFirst().gameName());
         Assertions.assertEquals(gameData.gameID(), games.getFirst().gameID());
     }
+    @Test
+    @Order(13)
+    @DisplayName("Listing games with invalid authToken")
+    public void listingGamesWithInvalidToken() throws ExceptionResponse {
+        //My test will consider the existingUserData as the user that is already registered and has an authToken
+        GameData gameData = facade.createGame("ExistingGame", existingAuth);
+        Assertions.assertNotNull(gameData);
+        Assertions.assertEquals("ExistingGame", gameData.gameName());
+        Assertions.assertTrue(gameData.gameID() > 0);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(existingAuth, "WHITE", gameData.gameID());
+        facade.joinGame(joinGameRequest);
+        //Now I will try to list the games with an invalid token
+        String fakeAuthToken = "fakeAuthToken1234";
+        ExceptionResponse exception = assertThrows(ExceptionResponse.class, () -> {
+            facade.listGames(fakeAuthToken);
+        });
+        Assertions.assertEquals(401, exception.getStatusCode());
+        Assertions.assertTrue(exception.getMessage().contains("Error: unauthorized"), exception.getMessage());
+    }
 
 }
