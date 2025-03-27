@@ -57,9 +57,8 @@ public class ChessClient {
         }
     }
 
-    private boolean isClientLoggedIn() throws ExceptionResponse {
+    public boolean isClientLoggedIn(){
         if (userToken == null || userToken.authToken() == null) {
-            System.out.println("You must be logged in to perform this action.");
             return false;
         }
         return true;
