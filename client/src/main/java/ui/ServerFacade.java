@@ -2,13 +2,16 @@ package ui;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import model.*;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
@@ -115,6 +118,27 @@ public class ServerFacade {
                 .header("Authorization", joinGameRequest.authToken())
                 .build();
         voidFunctionValidation(request);
+    }
+    public List<GameListData> listGames(String authToken) throws ExceptionResponse {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ServerUrl + "/game"))
+                .GET()
+                .header("Content-Type", "application/json")
+                .header("Authorization", authToken)
+                .build();
+        try {
+            HttpResponse<String> response = HttpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                Type listType = new TypeToken<List<GameListData>>(){}.getType();
+                return new Gson().fromJson(response.body(), listType);
+            }
+            else{
+                throw new ExceptionResponse(response.statusCode(), response.body());
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
     }
 
     public void clearData() throws ExceptionResponse {

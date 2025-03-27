@@ -9,6 +9,8 @@ import service.AppService;
 import ui.ExceptionResponse;
 import ui.ServerFacade;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -165,7 +167,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     @DisplayName("Joining into an already taken color")
     public void joiningGameIntoAnAlreadyTakenColor() throws ExceptionResponse {
         //My test will consider the existingUserData as the user that is already registered and has an authToken
@@ -183,6 +185,26 @@ public class ServerFacadeTests {
         });
         Assertions.assertEquals(403, exception.getStatusCode());
         Assertions.assertTrue(exception.getMessage().contains("Error: already taken"), exception.getMessage());
+    }
+    @Test
+    @Order(12)
+    @DisplayName("Listing games")
+    public void listingGames() throws ExceptionResponse {
+        //My test will consider the existingUserData as the user that is already registered and has an authToken
+        GameData gameData = facade.createGame("ExistingGame", existingAuth);
+        Assertions.assertNotNull(gameData);
+        Assertions.assertEquals("ExistingGame", gameData.gameName());
+        Assertions.assertTrue(gameData.gameID() > 0);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(existingAuth, "WHITE", gameData.gameID());
+        facade.joinGame(joinGameRequest);
+        //Now I will try to list the games
+        List<GameListData> games = facade.listGames(existingAuth);
+        Assertions.assertNotNull(games);
+        System.out.println(games);
+        Assertions.assertFalse(games.isEmpty());
+        Assertions.assertEquals(1, games.size());
+        Assertions.assertEquals("ExistingGame", games.getFirst().gameName());
+        Assertions.assertEquals(gameData.gameID(), games.getFirst().gameID());
     }
 
 }
