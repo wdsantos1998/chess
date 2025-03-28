@@ -94,7 +94,6 @@ public class ServerFacade {
 
             if (response.statusCode() == 200) {
                 String responseBody = response.body();
-                //Numeric values in JSON are by default Doubles. So, that's why I am casting it to Double and then to int
                 Map jsonMap = gson.fromJson(responseBody, Map.class);
                 Double gameIdDouble = (Double) jsonMap.get("gameID");
                 int gameID = gameIdDouble.intValue();
