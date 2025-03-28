@@ -1,11 +1,5 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
-import ui.EscapeSequences;
-import chess.ChessBoard;
-
 public class PrintChessBoard {
     private static final int BOARD_SIZE = 8;
 
