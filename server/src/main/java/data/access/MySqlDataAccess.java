@@ -108,9 +108,7 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public void updateGame(GameData gameData) throws DataAccessExceptionHTTP {
         int gameID = gameData.gameID();
-        //Updating current information
         var statement = "UPDATE game_data SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
-        //Inserting new record with update information
         executeUpdate(statement, gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(), gameData.game(), gameID);
     }
 
