@@ -12,8 +12,8 @@ public class Repl {
         private int gameID; //ID of the game the user is in
         private final ChessClient client;
 
-        public Repl (String URL){
-            client  = new ChessClient(URL);
+        public Repl (String url){
+            client  = new ChessClient(url);
             scanner = new Scanner(System.in);
             isLoggedIn = false;
             isInAGame = false;
