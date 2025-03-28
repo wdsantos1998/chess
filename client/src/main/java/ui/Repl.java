@@ -8,8 +8,8 @@ import java.util.Scanner;
 public class Repl {
         private final Scanner scanner;
         private boolean isLoggedIn;
-        private boolean isInAGame; //If user is in a game
-        private int gameID; //ID of the game the user is in
+        private boolean isInAGame;
+        private int gameID;
         private final ChessClient client;
 
         public Repl (String url){
