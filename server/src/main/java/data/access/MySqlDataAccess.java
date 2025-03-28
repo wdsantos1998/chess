@@ -48,7 +48,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read: %s", e.getMessage()));
         }
         return null;
     }
@@ -73,7 +73,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read: %s", e.getMessage()));
         }
         return null;
     }
@@ -132,7 +132,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read: %s", e.getMessage()));
         }
         return null;
     }
@@ -165,7 +165,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessExceptionHTTP(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessExceptionHTTP(500, String.format("Unable to read: %s", e.getMessage()));
         }
     }
 
@@ -221,21 +221,10 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    /**
-     *This function is used to hash passwords
-     * @param password (String)
-     * @return encrypted password (String)
-     */
-
     public String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
-    /**
-     *This function is used to compare the clean password text from the user with the hashed password we stored in the database
-     * @param clearPassword (String)
-     * @param hashedPassword (String)
-     * @return encrypted password (String)
-     */
+
     public Boolean verifyPassword(String clearPassword, String hashedPassword){
         return BCrypt.checkpw(clearPassword, hashedPassword);
     }
