@@ -15,8 +15,8 @@ public class ChessClient {
     private AuthData userToken;
     private Map<Integer, Integer> gameMap;
 
-    public ChessClient(String ServerUrl) {
-        server = new ServerFacade(ServerUrl);
+    public ChessClient(String serverUrl) {
+        server = new ServerFacade(serverUrl);
         gameMap = new HashMap<>();
     }
 
