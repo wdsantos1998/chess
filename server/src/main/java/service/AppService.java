@@ -152,8 +152,4 @@ public class AppService {
     private Boolean verifyPassword(String clearPassword, String hashedPassword){
         return BCrypt.checkpw(clearPassword, hashedPassword);
     }
-
-    private Boolean verifyUser(LoginRequest userA, LoginRequest userB){
-       return userA.username().equals(userB.username()) && verifyPassword(userA.password(),userB.password());
-    }
 }
