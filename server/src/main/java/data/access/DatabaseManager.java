@@ -1,10 +1,5 @@
 package data.access;
-
-import data.access.DataAccessException;
-
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.*;
 import java.util.Properties;
 
@@ -14,9 +9,6 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
 
-    /*
-     * Load the database information for the db.properties file.
-     */
     static {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
@@ -38,9 +30,6 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Creates the database if it does not already exist.
-     */
     static void createDatabase() throws DataAccessExceptionHTTP {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
@@ -55,14 +44,7 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Creates the database tables.
-     * This function assumes that an initial connection with the database was already established. Therefore, it must be executed after createDatabase.
-     */
     static void createDataBaseTables() throws DataAccessExceptionHTTP {
-        /**
-         * I needed to implement this way because the auto-grader did not accept my previous implementation where I was reading the files from a folder.
-         */
         String userTable = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(100));";
         String authTokenTable = "CREATE TABLE IF NOT EXISTS auth_token (id INT AUTO_INCREMENT PRIMARY KEY, authToken VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci, username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci);";
         String gameDataTable = "CREATE TABLE IF NOT EXISTS game_data (id INT AUTO_INCREMENT PRIMARY KEY, gameID INT UNIQUE, whiteUsername VARCHAR(100) NULL, blackUsername VARCHAR(100) NULL, gameName VARCHAR(100), game JSON);";
@@ -90,18 +72,6 @@ public class DatabaseManager {
     }
 
 
-    /**
-     * Create a connection to the database and sets the catalog based upon the
-     * properties specified in db.properties. Connections to the database should
-     * be short-lived, and you must close the connection when you are done with it.
-     * The easiest way to do that is with a try-with-resource block.
-     * <br/>
-     * <code>
-     * try (var conn = DbInfo.getConnection(databaseName)) {
-     * // execute SQL statements.
-     * }
-     * </code>
-     */
     static Connection getConnection() throws DataAccessExceptionHTTP {
         try {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
