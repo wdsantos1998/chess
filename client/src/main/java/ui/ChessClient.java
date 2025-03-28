@@ -84,21 +84,17 @@ public class ChessClient {
     }
 
     private List<GameListData> turnGameListIntoSequenceOfIndexes(List<GameListData> gameList) {
+        this.gameMap.clear();
+
         List<GameListData> returnGameList = new ArrayList<>();
-        gameList.forEach(game -> {
-            int mapLength = this.gameMap.size();
-            if (mapLength == 0) {
-                int currentIndexOfGame = mapLength + 1;
-                this.gameMap.put(currentIndexOfGame, game.gameID());
-                returnGameList.add(new GameListData(currentIndexOfGame, game.whiteUsername(), game.blackUsername(), game.gameName()));
-            } else {
-                if (!this.gameMap.containsValue(game.gameID())) {
-                    int currentIndexOfGame = mapLength + 1;
-                    this.gameMap.put(currentIndexOfGame, game.gameID());
-                    returnGameList.add(new GameListData(currentIndexOfGame, game.whiteUsername(), game.blackUsername(), game.gameName()));
-                }
-            }
-        });
+        int index = 1;
+
+        for (GameListData game : gameList) {
+            this.gameMap.put(index, game.gameID());
+            returnGameList.add(new GameListData(index, game.whiteUsername(), game.blackUsername(), game.gameName()));
+            index++;
+        }
+
         return returnGameList;
     }
 
