@@ -4,13 +4,13 @@ public class PrintChessBoard {
     private static final int BOARD_SIZE = 8;
 
     public static void printGenericBoard(String color) {
-        if (color.equals("black")) {
+        if (color.equalsIgnoreCase("black")) {
             System.out.println("Displaying the chessboard from the perspective of the " + color + " player");
             //Drawing board from the perspective of the black player
             String[][] board = {
                     // row 0 - black main pieces
                     {EscapeSequences.BLACK_ROOK, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_BISHOP,
-                            EscapeSequences.BLACK_KING, EscapeSequences.BLACK_QUEEN, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_ROOK},
+                            EscapeSequences.BLACK_QUEEN,EscapeSequences.BLACK_KING,  EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_ROOK},
 
 
                     // row 1 - black pawns
@@ -35,10 +35,9 @@ public class PrintChessBoard {
 
 
                     // row 7  white main pieces
-                    {EscapeSequences.WHITE_ROOK, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_QUEEN,
-                            EscapeSequences.WHITE_KING, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_ROOK}
+                    {EscapeSequences.WHITE_ROOK, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_BISHOP,
+                             EscapeSequences.WHITE_QUEEN,EscapeSequences.WHITE_KING, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_ROOK}
             };
-
             printBoard(board, true);
         } else {
 
@@ -73,7 +72,7 @@ public class PrintChessBoard {
 
 
                     // row 7  black main pieces
-                    {EscapeSequences.BLACK_ROOK, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KING, EscapeSequences.BLACK_QUEEN,
+                    {EscapeSequences.BLACK_ROOK, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_BISHOP,EscapeSequences.BLACK_QUEEN, EscapeSequences.BLACK_KING,
                             EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_ROOK},
             };
             printBoard(board, false);
@@ -96,9 +95,9 @@ public class PrintChessBoard {
                 int col = reverse ? BOARD_SIZE - 1 - c : c;
 
                 if ((row + col) % 2 == 0) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                } else {
                     System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                } else {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
                 }
 
                 System.out.print(board[row][col]);
