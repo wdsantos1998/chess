@@ -23,10 +23,6 @@ public class Repl {
             processCommand("help");
             String input;
             while (true) {
-                if(isInAGame){
-                    PrintChessBoard.printGenericBoard("white");
-                    PrintChessBoard.printGenericBoard("black");
-                }
                 System.out.print("Enter command: ");
                 input = scanner.nextLine();
                 if ("quit".equalsIgnoreCase(input)) {
@@ -91,6 +87,7 @@ public class Repl {
                             System.out.println("create game - Create a new game");
                             System.out.println("list games - List all available games");
                             System.out.println("play game - Join an existing game");
+                            System.out.println("observe game - Join game as an observer");
                         }
                         case "list", "list games" -> {
                             client.listGames().forEach(game -> System.out.println("ID: " + game.gameID() + ", Game Name: " + game.gameName() + ", WHITE: " + game.whiteUsername() + ", BLACK: " + game.blackUsername()));
@@ -103,16 +100,41 @@ public class Repl {
                         }
                         case "play", "play game" -> {
                             System.out.print("Enter Game ID to join: ");
-                            int gameId = Integer.parseInt(scanner.nextLine());
+                            String observeString = scanner.nextLine();
+                            try {
+                                int gameId = Integer.parseInt(observeString);
+                                this.gameID = gameId;
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Please enter a valid integer.");
+                                return;
+                            }
                             System.out.print("Enter player type (white/black): ");
                             String playerType = scanner.nextLine().toUpperCase();
-                            client.joinGame(gameId, playerType);
+                            if (!playerType.equals("WHITE") && !playerType.equals("BLACK")) {
+                                System.out.println("Invalid player type. Please enter 'white' or 'black'.");
+                                return;
+                            }
+                            client.joinGame(this.gameID, playerType);
                             System.out.println("Joined game.");
+                            PrintChessBoard.printGenericBoard(playerType);
                             isInAGame = true;
-                            gameID = gameId;
+                        }
+                        case "observe", "observe game" -> {
+                            System.out.print("Enter Game ID to observe: ");
+                            String observeString = scanner.nextLine();
+                            try {
+                                this.gameID = Integer.parseInt(observeString);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Please enter a valid integer.");
+                                return;
+                            }
+                            System.out.println("Observing as WHITE.");
+                            PrintChessBoard.printGenericBoard("white");
+                            isInAGame = true;
                         }
                         case "logout" -> {
                             client.logout();
+                            isInAGame = false;
                             System.out.println("Logged out successfully.");
                             isLoggedIn = client.isClientLoggedIn();
                         }
