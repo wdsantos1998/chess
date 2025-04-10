@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    private final Gson gson = new Gson();
 
     public void addConnection(String authToken, int gameID, Session session) {
         connections.put(authToken, new Connection(authToken, gameID, session));
@@ -21,7 +22,7 @@ public class ConnectionManager {
     public void broadcast(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
         for (var c : connections.values()) {
             if (c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
-                c.sendMessage(new Gson().toJson(notification));
+                c.sendMessage(gson.toJson(notification));
             }
 
         }
