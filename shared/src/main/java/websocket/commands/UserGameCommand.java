@@ -29,6 +29,7 @@ public class UserGameCommand {
         RESIGN,
         JOIN_PLAYER,
         JOIN_OBSERVER,
+        LOAD_GAME_DATA,
     }
 
     public CommandType getCommandType() {

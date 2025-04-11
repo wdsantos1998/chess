@@ -1,4 +1,5 @@
 package ui;
+import chess.ChessGame;
 import model.GameData;
 import model.LoginRequest;
 import model.UserData;
@@ -117,14 +118,20 @@ public class Repl implements NotificationHandler {
                                     System.out.println("Invalid input. Please enter a valid integer.");
                                     return;
                                 }
-                                System.out.print("Enter player type (white/black): ");
+                                System.out.print("Enter player type (white/black/observer): ");
                                 String playerType = scanner.nextLine().toUpperCase();
-                                if (!playerType.equals("WHITE") && !playerType.equals("BLACK")) {
-                                    System.out.println("Invalid player type. Please enter 'white' or 'black'.");
+                                if (!playerType.equals("WHITE") && !playerType.equals("BLACK") && !playerType.equals("OBSERVER")) {
+                                    System.out.println("Invalid player type. Please enter 'white' , 'black' or 'observer'.");
                                     return;
                                 }
-                                client.joinGame(this.gameID, playerType);
-                                System.out.println("Joined game.");
+                                if(playerType.equals("OBSERVER")) {
+                                    client.joinGameAsObserver(this.gameID);
+                                    System.out.println("Joined game as observer.");
+                                }
+                                else{
+                                    client.joinGame(this.gameID, playerType);
+                                    System.out.println("Joined game.");
+                                }
                                 PrintChessBoard.printGenericBoard(playerType);
                                 isInAGame = true;
                             }
@@ -166,6 +173,10 @@ public class Repl implements NotificationHandler {
                                 System.out.println("resign - User forfeits the game and the game is over");
                                 System.out.println("legal moves - Highlight Legal Moves");
                             }
+                            case "redraw" -> {
+                                client.redrawBoard(this.gameID);
+                                System.out.println("Redrawing board.");
+                            }
                             case "leave" -> {
                                 client.leaveGame(this.gameID);
                                 isInAGame = false;
@@ -192,7 +203,7 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void load(LoadGame loadGame) {
-        //printBoard with the specific game
+        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard());
     }
 
     @Override

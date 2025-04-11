@@ -3,8 +3,10 @@ package websocket;
 import com.google.gson.Gson;
 import model.GameData;
 import ui.ExceptionResponse;
+import websocket.commands.JoinObserverCommand;
 import websocket.commands.JoinPlayerCommand;
 import websocket.commands.LeaveCommand;
+import websocket.commands.LoadGameDataCommand;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
@@ -60,9 +62,26 @@ public class WebSocketFacade {
         }
     }
 
+    public void joinGameAsObserver(String authToken, Integer gameID) throws ExceptionResponse {
+        try {
+            JoinObserverCommand command = new JoinObserverCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+        } catch (IOException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
+
     public void leaveGame(String authToken, Integer gameID) throws ExceptionResponse {
         try {
             LeaveCommand command = new LeaveCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+        } catch (IOException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
+    public void redrawGame(String authToken, Integer gameID) throws ExceptionResponse {
+        try {
+            LoadGameDataCommand command = new LoadGameDataCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());

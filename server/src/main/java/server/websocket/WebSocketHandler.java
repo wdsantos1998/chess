@@ -1,5 +1,7 @@
 package server.websocket;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 import javax.websocket.*;
@@ -16,9 +18,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.ConnectionManager;
 import service.AppService;
-import websocket.commands.JoinPlayerCommand;
-import websocket.commands.LeaveCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 
 @WebSocket
@@ -51,6 +52,7 @@ public class WebSocketHandler {
                 gameData = dataAccess.getGameData(leaveCommand.getGameID());
                 if(gameData.whiteUsername().equals(userAuthData.username())) {
                     dataAccess.updateGame(new GameData(null, gameData.blackUsername(),gameData.gameName(), gameData.gameID(), gameData.game()));
+                    ChessBoard game = gameData.game().getBoard();
                 }
                 else{
                     dataAccess.updateGame(new GameData(gameData.whiteUsername(), null, gameData.gameName(), gameData.gameID(), gameData.game()));
@@ -59,6 +61,17 @@ public class WebSocketHandler {
                 String leaveMessage = String.format("User %s left game %s", userAuthData.username(), gameData.gameName());
                 connectionManager.broadcast(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
                 break;
+            case LOAD_GAME_DATA:
+                LoadGameDataCommand loadGameDataCommand = gson.fromJson(message, LoadGameDataCommand.class);
+                gameData = dataAccess.getGameData(loadGameDataCommand.getGameID());
+                session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
+            case JOIN_OBSERVER:
+                JoinObserverCommand joinObserverCommand = gson.fromJson(message, JoinObserverCommand.class);
+                connectionManager.addConnection(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), session);
+                userAuthData = dataAccess.getAuthData(joinObserverCommand.getAuthToken());
+                gameData = dataAccess.getGameData(joinObserverCommand.getGameID());
+                String observeMessage = String.format("User %s joined game %s as observer", userAuthData.username(), gameData.gameName());
+                connectionManager.broadcast(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), new Notification(observeMessage));
             default:
                 throw new IllegalArgumentException("Unknown command type: " + command.getCommandType());
         }

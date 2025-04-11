@@ -78,7 +78,7 @@ public class ChessClient {
             if(!gameMap.containsKey(gameID)){
                 throw new Exception("Error: gameID not found");
             }
-            server.joinGame(new JoinGameRequest(userToken.authToken(), playerColor, gameMap.get(gameID)));
+                server.joinGame(new JoinGameRequest(userToken.authToken(),playerColor, gameMap.get(gameID)));
             try{
                 webSocket = new WebSocketFacade(notificationHandler, serverUrl);
             }
@@ -91,9 +91,34 @@ public class ChessClient {
         }
     }
 
+    public void joinGameAsObserver(int gameID) throws Exception {
+        try {
+            turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
+            if(!gameMap.containsKey(gameID)){
+                throw new Exception("Error: gameID not found");
+            }
+            try{
+                webSocket = new WebSocketFacade(notificationHandler, serverUrl);
+            }
+            catch (Exception e){
+                throw new Exception(handleException(e.getMessage()));
+            }
+            webSocket.joinGameAsObserver(userToken.authToken(), gameMap.get(gameID));
+        } catch (Exception e) {
+            throw new Exception(handleException(e.getMessage()));
+        }
+    }
+
     public void leaveGame(int gameID) throws Exception {
         try {
             webSocket.leaveGame(userToken.authToken(), gameMap.get(gameID));
+        } catch (Exception e) {
+            throw new Exception(handleException(e.getMessage()));
+        }
+    }
+    public void redrawBoard(int gameID) throws Exception {
+        try {
+            webSocket.redrawGame(userToken.authToken(), gameMap.get(gameID));
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }
