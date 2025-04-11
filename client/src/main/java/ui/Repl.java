@@ -168,7 +168,7 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void notify(Notification notification) {
-        System.out.println("\n" + SET_TEXT_COLOR_BLUE + notification.getMessage()+ "This is coming from backend" + SET_TEXT_COLOR_BLUE);
+        System.out.println("\n" +">>>"+ SET_TEXT_COLOR_BLUE + notification.getMessage() + SET_TEXT_COLOR_BLUE+"<<<");
     }
 
     @Override
@@ -178,6 +178,6 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void warn(Error error) {
-        System.out.println("\n" + SET_TEXT_COLOR_RED + error.getMessage() + SET_TEXT_COLOR_RED);
+        System.out.println("\n" +">>>"+ SET_TEXT_COLOR_RED + error.getMessage() + SET_TEXT_COLOR_RED+"<<<");
     }
 }

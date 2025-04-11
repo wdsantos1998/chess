@@ -53,8 +53,6 @@ public class WebSocketFacade {
         try {
             JoinPlayerCommand command = new JoinPlayerCommand(authToken, gameID, playerColor);
             this.session.getBasicRemote().sendText(gson.toJson(command));
-            this.notificationHandler.notify(new Notification("Joined game " + gameID));
-            System.out.println("✅ Sent join request for game " + gameID);
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());
         }

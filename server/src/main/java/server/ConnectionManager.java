@@ -22,7 +22,7 @@ public class ConnectionManager {
     public void broadcast(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
         for (var c : connections.values()) {
             if (c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
-                System.out.println("👉 Sending to user: " + c.authToken);
+                System.out.println("Sending to user: " + c.authToken);
                 c.sendMessage(gson.toJson(notification));
             }
 
