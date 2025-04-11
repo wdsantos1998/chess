@@ -5,3 +5,4 @@ public class JoinObserverCommand extends UserGameCommand {
         super(CommandType.JOIN_OBSERVER, authToken, gameId);
     }
 }
+
