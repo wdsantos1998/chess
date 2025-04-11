@@ -1,5 +1,6 @@
 package ui;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,14 +9,21 @@ import java.util.Map;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import model.*;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
 
 public class ChessClient {
     private final ServerFacade server;
+    private WebSocketFacade webSocket;
     private AuthData userToken;
     private Map<Integer, Integer> gameMap;
+    private final String serverUrl;
+    private final NotificationHandler notificationHandler;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) throws Exception {
+        this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
         server = new ServerFacade(serverUrl);
         gameMap = new HashMap<>();
     }
@@ -71,6 +79,13 @@ public class ChessClient {
                 throw new Exception("Error: gameID not found");
             }
             server.joinGame(new JoinGameRequest(userToken.authToken(), playerColor, gameMap.get(gameID)));
+            try{
+                webSocket = new WebSocketFacade(notificationHandler, serverUrl);
+            }
+            catch (Exception e){
+                throw new Exception(handleException(e.getMessage()));
+            }
+            webSocket.joinPlayer(userToken.authToken(), gameMap.get(gameID), playerColor);
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }

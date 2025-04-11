@@ -2,9 +2,11 @@ package server;
 
 import controller.AppHandler;
 import data.access.MemoryDataAccess;
-import data.access.MySqlDataAccess;
+import server.websocket.WebSocketHandler;
 import service.AppService;
 import spark.*;
+
+import javax.websocket.server.ServerContainer;
 
 import static spark.Spark.exception;
 
@@ -14,10 +16,15 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-
         // Register your endpoints and handle exceptions here.
-        AppHandler userHandler = new AppHandler(new AppService(new MySqlDataAccess()));
+        AppService appService = new AppService(new MemoryDataAccess());
+        AppHandler userHandler = new AppHandler(appService);
+        WebSocketHandler webSocketHandler = new WebSocketHandler();
+        Spark.webSocket("/connect", webSocketHandler);
+
         userHandler.startRoutes();
+
+
 
         // Handle unhandled exceptions
         exception(Exception.class, (e, req, res) -> {

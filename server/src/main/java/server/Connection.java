@@ -1,6 +1,6 @@
 package server;
 
-import javax.websocket.Session;
+import org.eclipse.jetty.websocket.api.Session;
 
 public class Connection {
     public String authToken;
@@ -15,6 +15,7 @@ public class Connection {
 
     public void sendMessage(String msg) throws Exception
     {
-        session.getBasicRemote().sendText(msg);
+        session.getRemote().sendString(msg);
+        System.out.println("✅ Sent message: " + msg);
     }
 }

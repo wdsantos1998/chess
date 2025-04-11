@@ -2,10 +2,13 @@ package ui;
 import model.GameData;
 import model.LoginRequest;
 import model.UserData;
-
+import websocket.NotificationHandler;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
 import java.util.Scanner;
+import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements NotificationHandler {
         private final Scanner scanner;
         private boolean isLoggedIn;
         private boolean isInAGame;
@@ -13,7 +16,12 @@ public class Repl {
         private final ChessClient client;
 
         public Repl (String url){
-            client  = new ChessClient(url);
+            try {
+            client  = new ChessClient(url, this);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             scanner = new Scanner(System.in);
             isLoggedIn = false;
             isInAGame = false;
@@ -157,4 +165,19 @@ public class Repl {
             Repl repl = new Repl("http://localhost:8080");
             repl.run();
         }
+
+    @Override
+    public void notify(Notification notification) {
+        System.out.println("\n" + SET_TEXT_COLOR_BLUE + notification.getMessage()+ "This is coming from backend" + SET_TEXT_COLOR_BLUE);
     }
+
+    @Override
+    public void load(LoadGame loadGame) {
+        //printBoard with the specific game
+    }
+
+    @Override
+    public void warn(Error error) {
+        System.out.println("\n" + SET_TEXT_COLOR_RED + error.getMessage() + SET_TEXT_COLOR_RED);
+    }
+}

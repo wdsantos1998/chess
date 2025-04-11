@@ -2,6 +2,7 @@ package websocket;
 
 import com.google.gson.Gson;
 import ui.ExceptionResponse;
+import websocket.commands.JoinPlayerCommand;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
@@ -11,9 +12,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@ClientEndpoint
 public class WebSocketFacade {
     private Session session;
-    private NotificationHandler notificationHandler;
+    private final NotificationHandler notificationHandler;
     private final Gson gson = new Gson();
 
 
@@ -27,7 +29,6 @@ public class WebSocketFacade {
             this.session = container.connectToServer(this, socketUri);
 
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
                 public void onMessage(String message) {
                     ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
                     switch (serverMessage.getServerMessageType()) {
@@ -48,6 +49,15 @@ public class WebSocketFacade {
         }
     }
 
-
+    public void joinPlayer(String authToken, Integer gameID, String playerColor) throws ExceptionResponse {
+        try {
+            JoinPlayerCommand command = new JoinPlayerCommand(authToken, gameID, playerColor);
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+            this.notificationHandler.notify(new Notification("Joined game " + gameID));
+            System.out.println("✅ Sent join request for game " + gameID);
+        } catch (IOException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
 
 }
