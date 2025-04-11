@@ -1,8 +1,10 @@
 package websocket;
 
 import com.google.gson.Gson;
+import model.GameData;
 import ui.ExceptionResponse;
 import websocket.commands.JoinPlayerCommand;
+import websocket.commands.LeaveCommand;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
@@ -52,6 +54,15 @@ public class WebSocketFacade {
     public void joinPlayer(String authToken, Integer gameID, String playerColor) throws ExceptionResponse {
         try {
             JoinPlayerCommand command = new JoinPlayerCommand(authToken, gameID, playerColor);
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+        } catch (IOException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
+
+    public void leaveGame(String authToken, Integer gameID) throws ExceptionResponse {
+        try {
+            LeaveCommand command = new LeaveCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());

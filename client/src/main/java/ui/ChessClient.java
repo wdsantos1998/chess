@@ -91,6 +91,14 @@ public class ChessClient {
         }
     }
 
+    public void leaveGame(int gameID) throws Exception {
+        try {
+            webSocket.leaveGame(userToken.authToken(), gameMap.get(gameID));
+        } catch (Exception e) {
+            throw new Exception(handleException(e.getMessage()));
+        }
+    }
+
     public boolean isClientLoggedIn() {
         if (userToken == null || userToken.authToken() == null) {
             return false;

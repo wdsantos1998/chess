@@ -47,9 +47,15 @@ public class WebSocketHandler {
                 break;
             case LEAVE:
                 LeaveCommand leaveCommand = gson.fromJson(message, LeaveCommand.class);
-                connectionManager.removeConnections(leaveCommand.getAuthToken());
                 userAuthData = dataAccess.getAuthData(leaveCommand.getAuthToken());
                 gameData = dataAccess.getGameData(leaveCommand.getGameID());
+                if(gameData.whiteUsername().equals(userAuthData.username())) {
+                    dataAccess.updateGame(new GameData(null, gameData.blackUsername(),gameData.gameName(), gameData.gameID(), gameData.game()));
+                }
+                else{
+                    dataAccess.updateGame(new GameData(gameData.whiteUsername(), null, gameData.gameName(), gameData.gameID(), gameData.game()));
+                }
+                connectionManager.removeConnections(leaveCommand.getAuthToken());
                 String leaveMessage = String.format("User %s left game %s", userAuthData.username(), gameData.gameName());
                 connectionManager.broadcast(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
                 break;

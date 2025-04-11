@@ -20,12 +20,15 @@ public class ConnectionManager {
     }
 
     public void broadcast(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
+        if (connections.isEmpty()) {
+            System.out.println("No sessions found for token " + excludeAuthToken);
+            return;
+        }
         for (var c : connections.values()) {
-            if (c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
+            if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
                 System.out.println("Sending to user: " + c.authToken);
                 c.sendMessage(gson.toJson(notification));
             }
-
         }
     }
 }
