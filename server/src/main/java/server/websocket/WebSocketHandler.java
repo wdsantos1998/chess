@@ -47,6 +47,9 @@ public class WebSocketHandler {
             case MAKE_MOVE:
                 makeMove(gson.fromJson(message, MakeMoveCommand.class), session);
                 break;
+            case RESIGN:
+                resignGame(gson.fromJson(message, ResignCommand.class), session);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown command type: " + command.getCommandType());
         }
@@ -79,7 +82,6 @@ public class WebSocketHandler {
     public void joinGameAsObserver(JoinObserverCommand joinObserverCommand, Session session) throws Exception {
         connectionManager.addConnection(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), session);
         AuthData userAuthData = dataAccess.getAuthData(joinObserverCommand.getAuthToken());
-        GameData gameData = dataAccess.getGameData(joinObserverCommand.getGameID());
         String observeMessage = String.format("User %s joined game as an observer", userAuthData.username());
         connectionManager.broadcast(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), new Notification(observeMessage));
     }
@@ -93,8 +95,6 @@ public class WebSocketHandler {
         connectionManager.addConnection(joinPlayerCommand.getAuthToken(), joinPlayerCommand.getGameID(), session);
         AuthData userAuthData = dataAccess.getAuthData(joinPlayerCommand.getAuthToken());
         GameData gameData = dataAccess.getGameData(joinPlayerCommand.getGameID());
-        ChessGame chessGame = gameData.game();
-        String whichPlayerPlaysFirst = chessGame.getTeamTurn().toString();
         String playerColor;
         if (gameData.whiteUsername().equals(userAuthData.username())) {
             playerColor = "white";
@@ -123,7 +123,22 @@ public class WebSocketHandler {
         connectionManager.broadcast(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
     }
 
-    public boolean isUserAuthorized(String authToken, Integer gameID) throws DataAccessExceptionHTTP {
+    public void resignGame(ResignCommand resignCommand, Session session) throws Exception {
+        if(!isUserAuthorized(resignCommand.getAuthToken(), resignCommand.getGameID())) {
+            String errorMessage = "Error: You are not a player, so you cannot resign from the game.";
+            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            return;
+        }
+        AuthData userAuthData = dataAccess.getAuthData(resignCommand.getAuthToken());
+        GameData gameData = dataAccess.getGameData(resignCommand.getGameID());
+        ChessGame chessGame = gameData.game();
+        chessGame.setGameOver(true);
+        dataAccess.updateGame(new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGame));
+        String resignMessage = String.format("User %s resigned from game. You won", userAuthData.username());
+        connectionManager.broadcast(resignCommand.getAuthToken(), resignCommand.getGameID(), new Notification(resignMessage));
+    }
+
+    public boolean isUserAuthorized(String authToken, Integer gameID) throws Exception {
         AuthData userAuthData = dataAccess.getAuthData(authToken);
         GameData gameData = dataAccess.getGameData(gameID);
         return userAuthData.username().equals(gameData.whiteUsername()) || userAuthData.username().equals(gameData.blackUsername());

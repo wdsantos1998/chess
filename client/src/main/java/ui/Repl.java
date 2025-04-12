@@ -1,6 +1,5 @@
 package ui;
 import chess.ChessGame;
-import chess.ChessMove;
 import chess.ChessPosition;
 import model.GameData;
 import model.LoginRequest;
@@ -15,9 +14,12 @@ public class Repl implements NotificationHandler {
         private final Scanner scanner;
         private boolean isLoggedIn;
         private boolean isInAGame;
+        private boolean isObserver;
         private int gameID;
         private final ChessClient client;
         private ChessGame.TeamColor teamColor;
+        private boolean isGameOver = false;
+        private ChessGame.TeamColor whosTurn = ChessGame.TeamColor.WHITE;
 
         public Repl (String url){
             try {
@@ -101,7 +103,6 @@ public class Repl implements NotificationHandler {
                                 System.out.println("list games - List all available games");
                                 System.out.println("play game - Join an existing game");
                                 System.out.println("observe game - Join game as an observer");
-                                System.out.print("Enter command: ");
                             }
                             case "list", "list games" -> {
                                 client.listGames().forEach(game -> System.out.println("ID: " + game.gameID() + ", Game Name: " + game.gameName() + ", WHITE: " + game.whiteUsername() + ", BLACK: " + game.blackUsername()));
@@ -131,6 +132,7 @@ public class Repl implements NotificationHandler {
                                 if(playerType.equals("OBSERVER")) {
                                     client.joinGameAsObserver(this.gameID);
                                     this.teamColor = ChessGame.TeamColor.WHITE;
+                                    isObserver = true;
                                     System.out.println("Joined game as observer.");
                                 }
                                 else{
@@ -173,37 +175,87 @@ public class Repl implements NotificationHandler {
                             }
                         }
                     } else {
-                        switch (command) {
-                            case "help" -> {
-                                System.out.println("Available commands:");
-                                System.out.println("help - Show this message");
-                                System.out.println("redraw - Redraw Chess Board");
-                                System.out.println("leave - Leave current game");
-                                System.out.println("make move - Make move in current game");
-                                System.out.println("resign - User forfeits the game and the game is over");
-                                System.out.println("legal moves - Highlight Legal Moves");
-                                System.out.print("Enter command: ");
-                            }
-                            case "redraw" -> {
-                                client.redrawBoard(this.gameID);
-                                System.out.println("Redrawing board.");
-                            }
-                            case "leave" -> {
-                                client.leaveGame(this.gameID);
-                                isInAGame = false;
-                                System.out.println("Left game successfully.");
-                            }
-                            case "make", "make move" -> {
-                                System.out.print("Enter move (e.g., e2 e4): ");
-                                String move = scanner.nextLine();
-                                String[] partsMove = move.split(" ");
-                                if (partsMove.length != 2) {
-                                    System.out.println("Invalid move format. Please enter a valid move.");
-                                    return;
+                        if(!isObserver) {
+                            switch (command) {
+                                case "help" -> {
+                                    System.out.println("Available commands:");
+                                    System.out.println("help - Show this message");
+                                    System.out.println("redraw - Redraw Chess Board");
+                                    System.out.println("leave - Leave current game");
+                                    System.out.println("make move - Make move in current game");
+                                    System.out.println("resign - User forfeits the game and the game is over");
+                                    System.out.println("legal moves - Highlight Legal Moves");
                                 }
-                                ChessPosition from = parseChessPosition(partsMove[0].trim().toLowerCase()) ;
-                                ChessPosition to = parseChessPosition(partsMove[1].trim().toLowerCase());
-                                client.makeMove(this.gameID, from, to, move);
+                                case "redraw" -> {
+                                    client.redrawBoard(this.gameID);
+                                    System.out.println("Redrawing board.");
+                                }
+                                case "leave" -> {
+                                    client.leaveGame(this.gameID);
+                                    isInAGame = false;
+                                    gameID = 0;
+                                    System.out.println("Left game successfully.");
+                                }
+                                case "make", "make move" -> {
+                                    if(isGameOver) {
+                                        System.out.println("Game is over. You cannot make a move.");
+                                        return;
+                                    }
+                                    if(whosTurn != this.teamColor) {
+                                        System.out.println("It's not your turn. Please wait for your opponent to make a move.");
+                                        return;
+                                    }
+                                    System.out.print("Enter move (e.g., e2 e4): ");
+                                    String move = scanner.nextLine();
+                                    String[] partsMove = move.split(" ");
+                                    if (partsMove.length != 2) {
+                                        System.out.println("Invalid move format. Please enter a valid move.");
+                                        return;
+                                    }
+                                    ChessPosition from = parseChessPosition(partsMove[0].trim().toLowerCase());
+                                    ChessPosition to = parseChessPosition(partsMove[1].trim().toLowerCase());
+                                    client.makeMove(this.gameID, from, to, move);
+                                }
+                                case "resign" -> {
+                                    if(isGameOver) {
+                                        System.out.println("Game is over. You cannot resign. You may leave the game.");
+                                        return;
+                                    }
+                                    System.out.print("Are you sure you want to resign? (yes/no): ");
+                                    String confirm = scanner.nextLine();
+                                    if (!confirm.equalsIgnoreCase("yes")) {
+                                        System.out.println("Resignation cancelled.");
+                                        return;
+                                    }
+                                    client.resignFromGame(this.gameID);
+                                    System.out.println("Resigned from game successfully. You lost. You may leave the game.");
+                                }
+                                default -> {
+                                    System.out.println("Unknown command.");
+                                }
+                            }
+                        }
+                        else{
+                            switch (command) {
+                                case "help" -> {
+                                    System.out.println("Available commands:");
+                                    System.out.println("help - Show this message");
+                                    System.out.println("redraw - Redraw Chess Board");
+                                    System.out.println("leave - Leave current game");
+                                    System.out.println("legal moves - Highlight Legal Moves");
+                                }
+                                case "redraw" -> {
+                                    client.redrawBoard(this.gameID);
+                                    System.out.println("Redrawing board.");
+                                }
+                                case "leave" -> {
+                                    client.leaveGame(this.gameID);
+                                    isInAGame = false;
+                                    System.out.println("Left game successfully.");
+                                }
+                                default -> {
+                                    System.out.println("Unknown command.");
+                                }
                             }
                         }
                     }
@@ -242,14 +294,14 @@ public class Repl implements NotificationHandler {
     @Override
     public void notify(Notification notification) throws Exception {
         System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ notification.getMessage() +"<<<" + RESET_TEXT_COLOR);
-        this.processCommand("help");
     }
 
     @Override
     public void load(LoadGame loadGame) throws Exception {
         boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
+        whosTurn = loadGame.getGame().getTeamTurn();
+        isGameOver = loadGame.getGame().isGameOver();
         PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isWhite);
-        this.processCommand("help");
     }
 
     @Override

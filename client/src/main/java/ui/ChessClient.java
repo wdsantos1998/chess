@@ -129,6 +129,18 @@ public class ChessClient {
             throw new Exception(handleException(e.getMessage()));
         }
     }
+    public void resignFromGame(int gameID) throws Exception {
+        turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
+        if(!gameMap.containsKey(gameID)){
+            throw new Exception("Error: gameID not found");
+        }
+        try {
+            webSocket.resignFromGame(userToken.authToken(), gameMap.get(gameID));
+        } catch (Exception e) {
+            throw new Exception(handleException(e.getMessage()));
+        }
+    }
+
     public void redrawBoard(int gameID) throws Exception {
         turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
         if(!gameMap.containsKey(gameID)){

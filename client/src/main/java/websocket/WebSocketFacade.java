@@ -102,6 +102,15 @@ public class WebSocketFacade {
             throw new ExceptionResponse(500, e.getMessage());
         }
     }
+    public void resignFromGame(String authToken, Integer gameID) throws ExceptionResponse {
+        try {
+            ResignCommand command = new ResignCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(gson.toJson(command));
+        } catch (IOException e) {
+            throw new ExceptionResponse(500, e.getMessage());
+        }
+    }
+
     public void redrawGame(String authToken, Integer gameID) throws ExceptionResponse {
         try {
             LoadGameDataCommand command = new LoadGameDataCommand(authToken, gameID);
