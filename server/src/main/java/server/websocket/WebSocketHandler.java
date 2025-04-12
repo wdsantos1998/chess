@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import data.access.DataAccessExceptionHTTP;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -52,6 +53,11 @@ public class WebSocketHandler {
     }
 
     public void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws Exception {
+        if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
+            String errorMessage = "Error: You are not a player, so you cannot make a move in the game.";
+            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            return;
+        }
         AuthData userAuthData = dataAccess.getAuthData(makeMoveCommand.getAuthToken());
         GameData gameData = dataAccess.getGameData(makeMoveCommand.getGameID());
         ChessGame chessGameData = gameData.game();
@@ -100,6 +106,11 @@ public class WebSocketHandler {
     }
 
     public void leaveGame(LeaveCommand leaveCommand, Session session) throws Exception {
+        if(!isUserAuthorized(leaveCommand.getAuthToken(), leaveCommand.getGameID())) {
+            String errorMessage = "Error: You are not a player, so you cannot leave the game.";
+            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            return;
+        }
         AuthData userAuthData = dataAccess.getAuthData(leaveCommand.getAuthToken());
         GameData gameData = dataAccess.getGameData(leaveCommand.getGameID());
         if (gameData.whiteUsername().equals(userAuthData.username())) {
@@ -110,6 +121,12 @@ public class WebSocketHandler {
         connectionManager.removeConnections(leaveCommand.getAuthToken());
         String leaveMessage = String.format("User %s left game %s", userAuthData.username(), gameData.gameName());
         connectionManager.broadcast(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
+    }
+
+    public boolean isUserAuthorized(String authToken, Integer gameID) throws DataAccessExceptionHTTP {
+        AuthData userAuthData = dataAccess.getAuthData(authToken);
+        GameData gameData = dataAccess.getGameData(gameID);
+        return userAuthData.username().equals(gameData.whiteUsername()) || userAuthData.username().equals(gameData.blackUsername());
     }
 
     @OnWebSocketConnect
