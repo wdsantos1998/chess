@@ -94,9 +94,9 @@ public class WebSocketFacade {
         }
     }
 
-    public void makeMove(String authToken, Integer gameID, ChessPosition from, ChessPosition to) throws ExceptionResponse {
+    public void makeMove(String authToken, Integer gameID, ChessPosition from, ChessPosition to, String moveString) throws ExceptionResponse {
         try {
-            MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, new ChessMove(from, to, null));
+            MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, new ChessMove(from, to, null), moveString);
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());

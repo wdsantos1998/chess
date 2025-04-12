@@ -124,7 +124,7 @@ public class PrintChessBoard {
      * Prints the chessboard from the perspective of the given ChessBoard object.
      *
      * @param board   The ChessBoard object to print.
-     * @param reverse If true, prints the board from the perspective of the black player.
+     * @param reverse If true, prints the board from the perspective of the white player.
      */
     public static void printChessBoardFromBoardData(ChessBoard board, boolean reverse) {
         System.out.println();

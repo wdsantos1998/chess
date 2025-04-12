@@ -60,14 +60,13 @@ public class WebSocketHandler {
             chessGameData.makeMove(makeMoveCommand.getMove());
             GameData updatedGameData = new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGameData);
             dataAccess.updateGame(updatedGameData);
-            ChessPiece movedPiece = chessGameData.getBoard().getPiece(makeMoveCommand.getMove().getStartPosition());
-            String moveMessage = String.format("User %s moved piece %s in game %s", userAuthData.username(), movedPiece.getPieceType().toString(),  gameData.gameName());
+            String[] partsMove = makeMoveCommand.getMoveStringRepresentation().split(" ");
+            String moveMessage = String.format("User %s made a move from %s to %s in game %s. Redraw board to update.", userAuthData.username(),partsMove[0].trim().toLowerCase(),partsMove[1].trim().toLowerCase(), gameData.gameName());
             session.getRemote().sendString(gson.toJson(new LoadGame(updatedGameData.game())));
             connectionManager.broadcast(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new Notification(moveMessage));
         }
         catch (Exception e) {
-            System.out.println("Error in makeMove: " + e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
+            session.getRemote().sendString(gson.toJson(new Error("Invalid move or not your turn")));
         }
     }
 

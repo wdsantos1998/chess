@@ -203,7 +203,7 @@ public class Repl implements NotificationHandler {
                                 }
                                 ChessPosition from = parseChessPosition(partsMove[0].trim().toLowerCase()) ;
                                 ChessPosition to = parseChessPosition(partsMove[1].trim().toLowerCase());
-                                client.makeMove(this.gameID,from, to);
+                                client.makeMove(this.gameID, from, to, move);
                             }
                         }
                     }
@@ -226,15 +226,18 @@ public class Repl implements NotificationHandler {
         }
 
         char colChar = Character.toLowerCase(input.charAt(0));
-        int col = colChar - 'a';
-        int row = Character.getNumericValue(input.charAt(1)) - 1;
+        char rowChar = input.charAt(1);
 
-        if (col >= 0 && col <= 7 && row >= 0 && row <= 7) {
+        int col = colChar - 'a' + 1;
+        int row = rowChar - '0';
+
+        if (col >= 1 && col <= 8 && row >= 1 && row <= 8) {
             return new ChessPosition(row, col);
         } else {
             return null;
         }
     }
+
 
     @Override
     public void notify(Notification notification) throws Exception {
@@ -244,8 +247,8 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void load(LoadGame loadGame) throws Exception {
-        boolean isBlack = this.teamColor == ChessGame.TeamColor.WHITE;
-        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isBlack);
+        boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
+        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isWhite);
         this.processCommand("help");
     }
 
