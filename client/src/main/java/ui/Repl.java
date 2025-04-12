@@ -99,6 +99,7 @@ public class Repl implements NotificationHandler {
                                 System.out.println("list games - List all available games");
                                 System.out.println("play game - Join an existing game");
                                 System.out.println("observe game - Join game as an observer");
+                                System.out.print("Enter command: ");
                             }
                             case "list", "list games" -> {
                                 client.listGames().forEach(game -> System.out.println("ID: " + game.gameID() + ", Game Name: " + game.gameName() + ", WHITE: " + game.whiteUsername() + ", BLACK: " + game.blackUsername()));
@@ -179,6 +180,7 @@ public class Repl implements NotificationHandler {
                                 System.out.println("make move - Make move in current game");
                                 System.out.println("resign - User forfeits the game and the game is over");
                                 System.out.println("legal moves - Highlight Legal Moves");
+                                System.out.print("Enter command: ");
                             }
                             case "redraw" -> {
                                 client.redrawBoard(this.gameID);
@@ -204,18 +206,20 @@ public class Repl implements NotificationHandler {
         }
 
     @Override
-    public void notify(Notification notification) {
-        System.out.println("\n" +">>>"+ SET_TEXT_COLOR_BLUE + notification.getMessage() + SET_TEXT_COLOR_BLUE+"<<<");
+    public void notify(Notification notification) throws Exception {
+        System.out.println("\n" +">>>"+ notification.getMessage() +"<<<");
+        this.processCommand("help");
     }
 
     @Override
-    public void load(LoadGame loadGame) {
+    public void load(LoadGame loadGame) throws Exception {
         boolean isBlack = this.teamColor == ChessGame.TeamColor.WHITE;
         PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isBlack);
+        this.processCommand("help");
     }
 
     @Override
-    public void warn(Error error) {
-        System.out.println("\n" +">>>"+ SET_TEXT_COLOR_RED + error.getMessage() + SET_TEXT_COLOR_RED+"<<<");
+    public void warn(Error error) throws Exception {
+        System.out.println("\n" +">>>"+ error.getMessage() +"<<<");
     }
 }

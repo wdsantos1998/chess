@@ -37,13 +37,28 @@ public class WebSocketFacade {
                     ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
                     switch (serverMessage.getServerMessageType()) {
                         case NOTIFICATION:
+                            try{
                             notificationHandler.notify(gson.fromJson(message, Notification.class));
+                            }
+                            catch (Exception e){
+                                System.out.println("Error in notification handler: " + e.getMessage());
+                            }
                             break;
                         case LOAD_GAME:
-                            notificationHandler.load(gson.fromJson(message, LoadGame.class));
+                            try {
+                                notificationHandler.load(gson.fromJson(message, LoadGame.class));
+                            }
+                            catch (Exception e){
+                                System.out.println("Error in notification handler: " + e.getMessage());
+                            }
                             break;
                         default:
-                            notificationHandler.warn(gson.fromJson(message, Error.class));
+                            try {
+                                notificationHandler.warn(gson.fromJson(message, Error.class));
+                            }
+                            catch (Exception e){
+                                System.out.println("Error in notification handler: " + e.getMessage());
+                            }
                             break;
                     }
                 }
