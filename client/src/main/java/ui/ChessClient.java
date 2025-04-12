@@ -117,6 +117,10 @@ public class ChessClient {
         }
     }
     public void redrawBoard(int gameID) throws Exception {
+        turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
+        if(!gameMap.containsKey(gameID)){
+            throw new Exception("Error: gameID not found");
+        }
         try {
             webSocket.redrawGame(userToken.authToken(), gameMap.get(gameID));
         } catch (Exception e) {

@@ -15,6 +15,7 @@ public class Repl implements NotificationHandler {
         private boolean isInAGame;
         private int gameID;
         private final ChessClient client;
+        private ChessGame.TeamColor teamColor;
 
         public Repl (String url){
             try {
@@ -126,13 +127,19 @@ public class Repl implements NotificationHandler {
                                 }
                                 if(playerType.equals("OBSERVER")) {
                                     client.joinGameAsObserver(this.gameID);
+                                    this.teamColor = ChessGame.TeamColor.WHITE;
                                     System.out.println("Joined game as observer.");
                                 }
                                 else{
+                                    if(playerType.equals("WHITE")) {
+                                        this.teamColor = ChessGame.TeamColor.WHITE;
+                                    } else {
+                                        this.teamColor = ChessGame.TeamColor.BLACK;
+                                    }
                                     client.joinGame(this.gameID, playerType);
                                     System.out.println("Joined game.");
                                 }
-                                PrintChessBoard.printGenericBoard(playerType);
+                                client.redrawBoard(this.gameID);
                                 isInAGame = true;
                             }
                             case "observe", "observe game" -> {
@@ -203,7 +210,8 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void load(LoadGame loadGame) {
-        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard());
+        boolean isBlack = this.teamColor == ChessGame.TeamColor.WHITE;
+        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isBlack);
     }
 
     @Override

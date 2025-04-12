@@ -65,6 +65,7 @@ public class WebSocketHandler {
                 LoadGameDataCommand loadGameDataCommand = gson.fromJson(message, LoadGameDataCommand.class);
                 gameData = dataAccess.getGameData(loadGameDataCommand.getGameID());
                 session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
+                break;
             case JOIN_OBSERVER:
                 JoinObserverCommand joinObserverCommand = gson.fromJson(message, JoinObserverCommand.class);
                 connectionManager.addConnection(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), session);
@@ -72,6 +73,7 @@ public class WebSocketHandler {
                 gameData = dataAccess.getGameData(joinObserverCommand.getGameID());
                 String observeMessage = String.format("User %s joined game %s as observer", userAuthData.username(), gameData.gameName());
                 connectionManager.broadcast(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), new Notification(observeMessage));
+                break;
             default:
                 throw new IllegalArgumentException("Unknown command type: " + command.getCommandType());
         }

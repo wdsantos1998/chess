@@ -120,28 +120,52 @@ public class PrintChessBoard {
         System.out.println();
     }
 
-    public static void printChessBoardFromBoardData(ChessBoard board) {
-        System.out.println("Printing the given ChessBoard:");
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
+    /**
+     * Prints the chessboard from the perspective of the given ChessBoard object.
+     *
+     * @param board   The ChessBoard object to print.
+     * @param reverse If true, prints the board from the perspective of the black player.
+     */
+    public static void printChessBoardFromBoardData(ChessBoard board, boolean reverse) {
+        System.out.println();
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR + "   ");
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            char c = (char) (reverse ? 'H' - i : 'A' + i);
+            System.out.print(" " + c + " ");
+        }
+        System.out.println();
+
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            int row = reverse ? r : BOARD_SIZE - 1 - r;
+            System.out.print(EscapeSequences.RESET_TEXT_COLOR + " " + (row + 1) + " ");
+
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                int col = reverse ? BOARD_SIZE - 1 - c : c;
+
                 if ((row + col) % 2 == 0) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-                } else {
                     System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                } else {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
                 }
+
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
                 if (piece != null) {
-                    if (piece.pieceColor == ChessGame.TeamColor.WHITE) {
-                        System.out.print(getPieceRepresentation(piece.type, true));
-                    } else {
-                        System.out.print(getPieceRepresentation(piece.type, false));
-                    }
+                    boolean isWhite = piece.pieceColor == ChessGame.TeamColor.WHITE;
+                    System.out.print(getPieceRepresentation(piece.type, isWhite));
                 } else {
                     System.out.print(EscapeSequences.EMPTY);
                 }
+
                 System.out.print(EscapeSequences.RESET_BG_COLOR);
             }
-            System.out.println();
+
+            System.out.println(EscapeSequences.RESET_TEXT_COLOR + " " + (row + 1));
+        }
+
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR + "   ");
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            char c = (char) (reverse ? 'H' - i : 'A' + i);
+            System.out.print(" " + c + " ");
         }
         System.out.println();
     }
