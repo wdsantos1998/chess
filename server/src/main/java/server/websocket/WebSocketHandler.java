@@ -65,7 +65,8 @@ public class WebSocketHandler {
             connectionManager.broadcast(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new Notification(moveMessage));
         }
         catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error("Invalid move or not your turn")));
+            String errorMessage = String.format("Error: %s", e.getMessage());
+            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
         }
     }
 
