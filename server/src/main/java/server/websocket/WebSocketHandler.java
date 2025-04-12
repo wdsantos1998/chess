@@ -1,7 +1,6 @@
 package server.websocket;
 
 import chess.ChessGame;
-import chess.ChessPiece;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -74,7 +73,7 @@ public class WebSocketHandler {
         connectionManager.addConnection(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), session);
         AuthData userAuthData = dataAccess.getAuthData(joinObserverCommand.getAuthToken());
         GameData gameData = dataAccess.getGameData(joinObserverCommand.getGameID());
-        String observeMessage = String.format("User %s joined game %s as observer", userAuthData.username(), gameData.gameName());
+        String observeMessage = String.format("User %s joined game as an observer", userAuthData.username());
         connectionManager.broadcast(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), new Notification(observeMessage));
     }
 
@@ -89,14 +88,13 @@ public class WebSocketHandler {
         GameData gameData = dataAccess.getGameData(joinPlayerCommand.getGameID());
         ChessGame chessGame = gameData.game();
         String whichPlayerPlaysFirst = chessGame.getTeamTurn().toString();
-        System.out.println("This team color plays first: " + whichPlayerPlaysFirst);
         String playerColor;
         if (gameData.whiteUsername().equals(userAuthData.username())) {
             playerColor = "white";
         } else {
             playerColor = "black";
         }
-        String messageToSend = String.format("User %s joined game %s as %s player", userAuthData.username(), gameData.gameName(), playerColor);
+        String messageToSend = String.format("User %s joined game as %s player", userAuthData.username(), playerColor);
         connectionManager.broadcast(joinPlayerCommand.getAuthToken(), joinPlayerCommand.getGameID(), new Notification(messageToSend));
     }
 
