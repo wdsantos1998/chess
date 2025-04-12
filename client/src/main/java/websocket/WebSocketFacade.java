@@ -68,18 +68,18 @@ public class WebSocketFacade {
         }
     }
 
-    public void joinPlayer(String authToken, Integer gameID, String playerColor) throws ExceptionResponse {
+    public void connectAsPlayer(String authToken, Integer gameID, String playerColor) throws ExceptionResponse {
         try {
-            JoinPlayerCommand command = new JoinPlayerCommand(authToken, gameID, playerColor);
+            ConnectCommand command = new ConnectCommand(authToken, gameID, playerColor);
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());
         }
     }
 
-    public void joinGameAsObserver(String authToken, Integer gameID) throws ExceptionResponse {
+    public void connectAsObserver(String authToken, Integer gameID) throws ExceptionResponse {
         try {
-            JoinObserverCommand command = new JoinObserverCommand(authToken, gameID);
+            ConnectCommand command = new ConnectCommand(authToken, gameID, null);
             this.session.getBasicRemote().sendText(gson.toJson(command));
         } catch (IOException e) {
             throw new ExceptionResponse(500, e.getMessage());
