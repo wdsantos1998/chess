@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -19,16 +20,32 @@ public class ConnectionManager {
         connections.remove(authToken);
     }
 
-    public void broadcast(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
+    /*
+        * This method is used to send notifications to all connected users, except the one with the given authToken.
+     */
+    public void broadcastNotification(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
         if (connections.isEmpty()) {
             System.out.println("No sessions found for token");
             return;
         }
         for (var c : connections.values()) {
-            //I can guarantee that the session is open, because I check it in the addConnection method
             if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
                 System.out.println("Sending to user: " + c.authToken);
                 c.sendMessage(gson.toJson(notification));
+            }
+        }
+    }
+    /*
+        * This method is used to load game updates to all connected users, except the one with the given authToken.
+     */
+    public void broadcastGame(String excludeAuthToken, Integer gameID, LoadGame loadGame) throws Exception {
+        if (connections.isEmpty()) {
+            System.out.println("No sessions found for");
+            return;
+        }
+        for (var c : connections.values()) {
+            if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
+                c.session.getRemote().sendString(gson.toJson(new LoadGame(loadGame.getGame())));
             }
         }
     }
