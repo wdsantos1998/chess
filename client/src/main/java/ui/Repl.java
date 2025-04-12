@@ -238,7 +238,7 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void notify(Notification notification) throws Exception {
-        System.out.println("\n" +">>>"+ notification.getMessage() +"<<<");
+        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ notification.getMessage() +"<<<" + RESET_TEXT_COLOR);
         this.processCommand("help");
     }
 
@@ -251,6 +251,6 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void warn(Error error) throws Exception {
-        System.out.println("\n" +">>>"+ error.getMessage() +"<<<");
+        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ error.getMessage() +"<<<"+ RESET_TEXT_COLOR);
     }
 }
