@@ -1,5 +1,7 @@
 package ui;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.GameData;
 import model.LoginRequest;
 import model.UserData;
@@ -191,6 +193,18 @@ public class Repl implements NotificationHandler {
                                 isInAGame = false;
                                 System.out.println("Left game successfully.");
                             }
+                            case "make", "make move" -> {
+                                System.out.print("Enter move (e.g., e2 e4): ");
+                                String move = scanner.nextLine();
+                                String[] partsMove = move.split(" ");
+                                if (partsMove.length != 2) {
+                                    System.out.println("Invalid move format. Please enter a valid move.");
+                                    return;
+                                }
+                                ChessPosition from = parseChessPosition(partsMove[0].trim().toLowerCase()) ;
+                                ChessPosition to = parseChessPosition(partsMove[1].trim().toLowerCase());
+                                client.makeMove(this.gameID,from, to);
+                            }
                         }
                     }
                 }
@@ -204,6 +218,23 @@ public class Repl implements NotificationHandler {
             Repl repl = new Repl("http://localhost:8080");
             repl.run();
         }
+
+
+    public ChessPosition parseChessPosition(String input) {
+        if (input.length() != 2) {
+            return null;
+        }
+
+        char colChar = Character.toLowerCase(input.charAt(0));
+        int col = colChar - 'a';
+        int row = Character.getNumericValue(input.charAt(1)) - 1;
+
+        if (col >= 0 && col <= 7 && row >= 0 && row <= 7) {
+            return new ChessPosition(row, col);
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public void notify(Notification notification) throws Exception {

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import chess.ChessPosition;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import model.*;
@@ -112,6 +113,18 @@ public class ChessClient {
     public void leaveGame(int gameID) throws Exception {
         try {
             webSocket.leaveGame(userToken.authToken(), gameMap.get(gameID));
+        } catch (Exception e) {
+            throw new Exception(handleException(e.getMessage()));
+        }
+    }
+
+    public void makeMove(int gameID, ChessPosition from, ChessPosition to) throws Exception{
+        turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
+        if(!gameMap.containsKey(gameID)){
+            throw new Exception("Error: gameID not found");
+        }
+        try{
+            webSocket.makeMove(userToken.authToken(), gameMap.get(gameID), from, to);
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }
