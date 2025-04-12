@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import model.GameData;
 import ui.ExceptionResponse;
 import websocket.commands.*;
+import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;

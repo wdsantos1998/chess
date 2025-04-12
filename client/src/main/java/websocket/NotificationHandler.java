@@ -1,5 +1,5 @@
 package websocket;
-
+import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 

@@ -7,6 +7,7 @@ import model.UserData;
 import websocket.NotificationHandler;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
+import websocket.messages.Error;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 

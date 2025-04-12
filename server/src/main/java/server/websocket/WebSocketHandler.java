@@ -1,6 +1,8 @@
 package server.websocket;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -16,6 +18,8 @@ import websocket.commands.*;
 import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
+
+import java.util.Collection;
 
 @WebSocket
 public class WebSocketHandler {
@@ -55,15 +59,20 @@ public class WebSocketHandler {
     }
 
     public void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws Exception {
-        if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
-            String errorMessage = "Error: You are not a player, so you cannot make a move in the game.";
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
-            return;
-        }
-        AuthData userAuthData = dataAccess.getAuthData(makeMoveCommand.getAuthToken());
-        GameData gameData = dataAccess.getGameData(makeMoveCommand.getGameID());
-        ChessGame chessGameData = gameData.game();
         try {
+            if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
+                String errorMessage = "You are not a player, so you cannot make a move in the game.";
+                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+                return;
+            }
+            AuthData userAuthData = dataAccess.getAuthData(makeMoveCommand.getAuthToken());
+            GameData gameData = dataAccess.getGameData(makeMoveCommand.getGameID());
+            ChessGame chessGameData = gameData.game();
+            if(!isValidMove(makeMoveCommand.getMove(), chessGameData)) {
+                String errorMessage = "Invalid move.";
+                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+                return;
+            }
             chessGameData.makeMove(makeMoveCommand.getMove());
             GameData updatedGameData = new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGameData);
             dataAccess.updateGame(updatedGameData);
@@ -74,8 +83,7 @@ public class WebSocketHandler {
             connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGame(chessGameData));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
@@ -87,8 +95,7 @@ public class WebSocketHandler {
             connectionManager.broadcastNotification(joinObserverCommand.getAuthToken(), joinObserverCommand.getGameID(), new Notification(observeMessage));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
@@ -98,8 +105,7 @@ public class WebSocketHandler {
             session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
@@ -118,15 +124,14 @@ public class WebSocketHandler {
             connectionManager.broadcastNotification(joinPlayerCommand.getAuthToken(), joinPlayerCommand.getGameID(), new Notification(messageToSend));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
     public void leaveGame(LeaveCommand leaveCommand, Session session) throws Exception {
         try {
             if (!isUserAuthorized(leaveCommand.getAuthToken(), leaveCommand.getGameID())) {
-                String errorMessage = "Error: You are not a player, so you cannot leave the game.";
+                String errorMessage = "You are not a player, so you cannot leave the game.";
                 session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
                 return;
             }
@@ -142,15 +147,14 @@ public class WebSocketHandler {
             connectionManager.broadcastNotification(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
     public void resignGame(ResignCommand resignCommand, Session session) throws Exception {
         try {
             if (!isUserAuthorized(resignCommand.getAuthToken(), resignCommand.getGameID())) {
-                String errorMessage = "Error: You are not a player, so you cannot resign from the game.";
+                String errorMessage = "You are not a player, so you cannot resign from the game.";
                 session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
                 return;
             }
@@ -163,8 +167,7 @@ public class WebSocketHandler {
             connectionManager.broadcastNotification(resignCommand.getAuthToken(), resignCommand.getGameID(), new Notification(resignMessage));
         }
         catch (Exception e) {
-            String errorMessage = String.format("Error: %s", e.getMessage());
-            session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
         }
     }
 
@@ -172,6 +175,22 @@ public class WebSocketHandler {
         AuthData userAuthData = dataAccess.getAuthData(authToken);
         GameData gameData = dataAccess.getGameData(gameID);
         return userAuthData.username().equals(gameData.whiteUsername()) || userAuthData.username().equals(gameData.blackUsername());
+    }
+
+    public boolean isValidMove(ChessMove move, ChessGame game) {
+        ChessGame.TeamColor currentTurn = game.getTeamTurn();
+        ChessBoard board = game.getBoard();
+        ChessGame.TeamColor pieceMovingColor = board.getPiece(move.getStartPosition()).getTeamColor();
+        if (pieceMovingColor != currentTurn) {
+            return false;
+        }
+        Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
+        for (ChessMove validMove : validMoves) {
+            if (validMove.getEndPosition().equals(move.getEndPosition())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @OnWebSocketConnect

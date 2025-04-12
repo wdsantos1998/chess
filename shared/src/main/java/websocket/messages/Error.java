@@ -8,7 +8,6 @@ public class Error extends ServerMessage{
         this.message = message;
     }
 
-    //Requirement in the specification
     public String getMessage(){
         return String.format("Error: %s", message);
     }
