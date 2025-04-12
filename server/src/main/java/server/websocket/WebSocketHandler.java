@@ -97,8 +97,16 @@ public class WebSocketHandler {
     public void connectToGame(ConnectCommand connectCommand, Session session) throws Exception {
         try {
             connectionManager.addConnection(connectCommand.getAuthToken(), connectCommand.getGameID(), session);
+            if(connectCommand.getAuthToken() == null) {
+                session.getRemote().sendString(gson.toJson(new Error("User not found.")));
+                return;
+            }
             AuthData userAuthData = dataAccess.getAuthData(connectCommand.getAuthToken());
             GameData gameData = dataAccess.getGameData(connectCommand.getGameID());
+            if(gameData.game() == null){
+                session.getRemote().sendString(gson.toJson(new Error("Game not found.")));
+                return;
+            }
             String playerText;
             if (gameData.whiteUsername().equals(userAuthData.username())) {
                 playerText = "white player";
