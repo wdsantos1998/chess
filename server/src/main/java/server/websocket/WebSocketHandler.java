@@ -60,6 +60,7 @@ public class WebSocketHandler {
             ChessGame chessGameData = gameData.game();
             if(chessGameData.isGameOver()){
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game is over.")));
+                return;
             }
             if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
                 session.getRemote().sendString(gson.toJson(new ErrorMessage("You are not a player, so you cannot make a move in the game.")));
@@ -122,21 +123,18 @@ public class WebSocketHandler {
 
     public void leaveGame(LeaveCommand leaveCommand, Session session) throws Exception {
         try {
-            if (!isUserAuthorized(leaveCommand.getAuthToken(), leaveCommand.getGameID())) {
-                String errorMessage = "You are not a player, so you cannot leave the game.";
-                session.getRemote().sendString(gson.toJson(new ErrorMessage(errorMessage)));
-                return;
-            }
             AuthData userAuthData = dataAccess.getAuthData(leaveCommand.getAuthToken());
             GameData gameData = dataAccess.getGameData(leaveCommand.getGameID());
-            if (gameData.whiteUsername().equals(userAuthData.username())) {
-                dataAccess.updateGame(new GameData(null, gameData.blackUsername(), gameData.gameName(), gameData.gameID(), gameData.game()));
-            } else {
-                dataAccess.updateGame(new GameData(gameData.whiteUsername(), null, gameData.gameName(), gameData.gameID(), gameData.game()));
+            if (isUserAuthorized(leaveCommand.getAuthToken(), leaveCommand.getGameID())) {
+                if (gameData.whiteUsername().equals(userAuthData.username())) {
+                    dataAccess.updateGame(new GameData(null, gameData.blackUsername(), gameData.gameName(), gameData.gameID(), gameData.game()));
+                } else {
+                    dataAccess.updateGame(new GameData(gameData.whiteUsername(), null, gameData.gameName(), gameData.gameID(), gameData.game()));
+                }
             }
             connectionManager.removeConnections(leaveCommand.getAuthToken());
             String leaveMessage = String.format("User %s left game %s", userAuthData.username(), gameData.gameName());
-            connectionManager.broadcastNotification(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new NotificationMessage(leaveMessage));
+            connectionManager.broadcastNotification(userAuthData.authToken(), gameData.gameID(), new NotificationMessage(leaveMessage));
         }
         catch (Exception e) {
             session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
@@ -145,18 +143,28 @@ public class WebSocketHandler {
 
     public void resignGame(ResignCommand resignCommand, Session session) throws Exception {
         try {
+            AuthData userAuthData = dataAccess.getAuthData(resignCommand.getAuthToken());
+            GameData gameData = dataAccess.getGameData(resignCommand.getGameID());
+            if(userAuthData == null || gameData == null){
+                session.getRemote().sendString(gson.toJson(new ErrorMessage("We couldn't find the game data")));
+                return;
+            }
+            if(gameData.game().isGameOver()){
+                session.getRemote().sendString(gson.toJson(new ErrorMessage("You cannot resign a game that is over.")));
+                return;
+            }
+
             if (!isUserAuthorized(resignCommand.getAuthToken(), resignCommand.getGameID())) {
                 String errorMessage = "You are not a player, so you cannot resign from the game.";
                 session.getRemote().sendString(gson.toJson(new ErrorMessage(errorMessage)));
                 return;
             }
-            AuthData userAuthData = dataAccess.getAuthData(resignCommand.getAuthToken());
-            GameData gameData = dataAccess.getGameData(resignCommand.getGameID());
             ChessGame chessGame = gameData.game();
             chessGame.setGameOver(true);
             dataAccess.updateGame(new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGame));
             String resignMessage = String.format("User %s resigned from game. You won", userAuthData.username());
             connectionManager.broadcastNotification(resignCommand.getAuthToken(), resignCommand.getGameID(), new NotificationMessage(resignMessage));
+            session.getRemote().sendString(gson.toJson(new NotificationMessage("You resigned the game.")));
         }
         catch (Exception e) {
             session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));

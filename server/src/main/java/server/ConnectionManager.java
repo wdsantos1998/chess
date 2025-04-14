@@ -30,7 +30,6 @@ public class ConnectionManager {
         }
         for (var c : connections.values()) {
             if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
-                System.out.println("Sending to user: " + c.authToken);
                 c.sendMessage(gson.toJson(notificationMessage));
             }
         }
