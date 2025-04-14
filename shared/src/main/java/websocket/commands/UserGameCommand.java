@@ -27,8 +27,6 @@ public class UserGameCommand {
         MAKE_MOVE,
         LEAVE,
         RESIGN,
-        JOIN_PLAYER,
-        JOIN_OBSERVER,
         LOAD_GAME_DATA,
     }
 

@@ -1,4 +1,5 @@
 package ui;
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPosition;
 import model.GameData;
@@ -21,6 +22,8 @@ public class Repl implements NotificationHandler {
         private ChessGame.TeamColor teamColor;
         private boolean isGameOver = false;
         private ChessGame.TeamColor whosTurn = ChessGame.TeamColor.WHITE;
+        private ChessBoard boardData;
+
 
         public Repl (String url){
             try {
@@ -145,7 +148,6 @@ public class Repl implements NotificationHandler {
                                     client.joinGame(this.gameID, playerType);
                                     System.out.println("Joined game.");
                                 }
-                                client.redrawBoard(this.gameID);
                                 isInAGame = true;
                             }
                             case "observe", "observe game" -> {
@@ -188,7 +190,7 @@ public class Repl implements NotificationHandler {
                                     System.out.println("legal moves - Highlight Legal Moves");
                                 }
                                 case "redraw" -> {
-                                    client.redrawBoard(this.gameID);
+                                    redrawBoard();
                                     System.out.println("Redrawing board.");
                                 }
                                 case "leave" -> {
@@ -246,7 +248,7 @@ public class Repl implements NotificationHandler {
                                     System.out.println("legal moves - Highlight Legal Moves");
                                 }
                                 case "redraw" -> {
-                                    client.redrawBoard(this.gameID);
+                                    redrawBoard();
                                     System.out.println("Redrawing board.");
                                 }
                                 case "leave" -> {
@@ -291,6 +293,10 @@ public class Repl implements NotificationHandler {
         }
     }
 
+    private void redrawBoard(){
+        boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
+        PrintChessBoard.printChessBoardFromBoardData(boardData, isWhite);
+    }
 
     @Override
     public void notify(Notification notification) throws Exception {
@@ -302,7 +308,8 @@ public class Repl implements NotificationHandler {
         boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
         whosTurn = loadGame.getGame().getTeamTurn();
         isGameOver = loadGame.getGame().isGameOver();
-        PrintChessBoard.printChessBoardFromBoardData(loadGame.getGame().getBoard(), isWhite);
+        boardData = loadGame.getGame().getBoard();
+        PrintChessBoard.printChessBoardFromBoardData(boardData, isWhite);
     }
 
     @Override

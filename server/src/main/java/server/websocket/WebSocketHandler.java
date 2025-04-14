@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -41,9 +42,6 @@ public class WebSocketHandler {
             case LEAVE:
                 leaveGame(gson.fromJson(message, LeaveCommand.class), session);
                 break;
-            case LOAD_GAME_DATA:
-                loadGameData(gson.fromJson(message, LoadGameDataCommand.class), session);
-                break;
             case MAKE_MOVE:
                 makeMove(gson.fromJson(message, MakeMoveCommand.class), session);
                 break;
@@ -65,29 +63,21 @@ public class WebSocketHandler {
             AuthData userAuthData = dataAccess.getAuthData(makeMoveCommand.getAuthToken());
             GameData gameData = dataAccess.getGameData(makeMoveCommand.getGameID());
             ChessGame chessGameData = gameData.game();
-            if(!isValidMove(makeMoveCommand.getMove(), chessGameData)) {
+            ChessMove move = makeMoveCommand.getMove();
+            if(!isValidMove(move, chessGameData)) {
                 String errorMessage = "Invalid move.";
                 session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
                 return;
             }
-            chessGameData.makeMove(makeMoveCommand.getMove());
+            chessGameData.makeMove(move);
             GameData updatedGameData = new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGameData);
             dataAccess.updateGame(updatedGameData);
-            String[] partsMove = makeMoveCommand.getMoveStringRepresentation().split(" ");
-            String moveMessage = String.format("User %s made a move from %s to %s in game %s.", userAuthData.username(),partsMove[0].trim().toLowerCase(),partsMove[1].trim().toLowerCase(), gameData.gameName());
+            String moveStartPosition = chessPositionToString(move.getStartPosition());
+            String moveEndPosition = chessPositionToString(move.getEndPosition());
+            String moveMessage = String.format("User %s made a move from %s to %s in game %s.", userAuthData.username(),moveStartPosition , moveEndPosition, gameData.gameName());
             connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new Notification(moveMessage));
             session.getRemote().sendString(gson.toJson(new LoadGame(chessGameData)));
             connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGame(chessGameData));
-        }
-        catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
-        }
-    }
-
-    public void loadGameData(LoadGameDataCommand loadGameDataCommand, Session session) throws Exception {
-        try {
-            GameData gameData = dataAccess.getGameData(loadGameDataCommand.getGameID());
-            session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
         }
         catch (Exception e) {
             session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
@@ -119,6 +109,7 @@ public class WebSocketHandler {
             }
             String messageToSend = String.format("User %s joined game as %s", userAuthData.username(), playerText);
             connectionManager.broadcastNotification(connectCommand.getAuthToken(), connectCommand.getGameID(), new Notification(messageToSend));
+            session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
         }
         catch (Exception e) {
             session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
@@ -188,6 +179,14 @@ public class WebSocketHandler {
             }
         }
         return false;
+    }
+
+    private String chessPositionToString(ChessPosition position){
+        char file = (char) ('a' + (position.getColumn() - 1));
+
+        int rank = position.getRow();
+
+        return "" + file + rank;
     }
 
     @OnWebSocketConnect
