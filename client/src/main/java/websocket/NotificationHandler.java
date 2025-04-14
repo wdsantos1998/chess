@@ -1,12 +1,12 @@
 package websocket;
-import websocket.messages.Error;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 public interface NotificationHandler {
-    void notify(Notification notification) throws Exception;
+    void notify(NotificationMessage notificationMessage) throws Exception;
 
-    void load(LoadGame loadGame) throws Exception;
+    void load(LoadGameMessage loadGameMessage) throws Exception;
 
-    void warn(Error error)  throws Exception;
+    void warn(ErrorMessage errorMessage)  throws Exception;
 }

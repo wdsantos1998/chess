@@ -5,9 +5,9 @@ import chess.ChessPosition;
 import com.google.gson.Gson;
 import ui.ExceptionResponse;
 import websocket.commands.*;
-import websocket.messages.Error;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -37,7 +37,7 @@ public class WebSocketFacade {
                     switch (serverMessage.getServerMessageType()) {
                         case NOTIFICATION:
                             try{
-                            notificationHandler.notify(gson.fromJson(message, Notification.class));
+                            notificationHandler.notify(gson.fromJson(message, NotificationMessage.class));
                             }
                             catch (Exception e){
                                 System.out.println("Error in notification handler: " + e.getMessage());
@@ -45,7 +45,7 @@ public class WebSocketFacade {
                             break;
                         case LOAD_GAME:
                             try {
-                                notificationHandler.load(gson.fromJson(message, LoadGame.class));
+                                notificationHandler.load(gson.fromJson(message, LoadGameMessage.class));
                             }
                             catch (Exception e){
                                 System.out.println("Error in notification handler: " + e.getMessage());
@@ -53,7 +53,7 @@ public class WebSocketFacade {
                             break;
                         default:
                             try {
-                                notificationHandler.warn(gson.fromJson(message, Error.class));
+                                notificationHandler.warn(gson.fromJson(message, ErrorMessage.class));
                             }
                             catch (Exception e){
                                 System.out.println("Error in notification handler: " + e.getMessage());

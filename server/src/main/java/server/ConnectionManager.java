@@ -1,8 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 import org.eclipse.jetty.websocket.api.Session;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public class ConnectionManager {
     /*
         * This method is used to send notifications to all connected users, except the one with the given authToken.
      */
-    public void broadcastNotification(String excludeAuthToken, Integer gameID, Notification notification) throws Exception {
+    public void broadcastNotification(String excludeAuthToken, Integer gameID, NotificationMessage notificationMessage) throws Exception {
         if (connections.isEmpty()) {
             System.out.println("No sessions found for token");
             return;
@@ -31,21 +31,21 @@ public class ConnectionManager {
         for (var c : connections.values()) {
             if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
                 System.out.println("Sending to user: " + c.authToken);
-                c.sendMessage(gson.toJson(notification));
+                c.sendMessage(gson.toJson(notificationMessage));
             }
         }
     }
     /*
         * This method is used to load game updates to all connected users, except the one with the given authToken.
      */
-    public void broadcastGame(String excludeAuthToken, Integer gameID, LoadGame loadGame) throws Exception {
+    public void broadcastGame(String excludeAuthToken, Integer gameID, LoadGameMessage loadGameMessage) throws Exception {
         if (connections.isEmpty()) {
             System.out.println("No sessions found for");
             return;
         }
         for (var c : connections.values()) {
             if (c != null && c.session.isOpen() && !c.authToken.equals(excludeAuthToken) && Objects.equals(c.gameID, gameID)) {
-                c.session.getRemote().sendString(gson.toJson(new LoadGame(loadGame.getGame())));
+                c.session.getRemote().sendString(gson.toJson(new LoadGameMessage(loadGameMessage.getGame())));
             }
         }
     }

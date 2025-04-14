@@ -6,9 +6,9 @@ import model.GameData;
 import model.LoginRequest;
 import model.UserData;
 import websocket.NotificationHandler;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
-import websocket.messages.Error;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ErrorMessage;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -299,21 +299,21 @@ public class Repl implements NotificationHandler {
     }
 
     @Override
-    public void notify(Notification notification) throws Exception {
-        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ notification.getMessage() +"<<<" + RESET_TEXT_COLOR);
+    public void notify(NotificationMessage notificationMessage) throws Exception {
+        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ notificationMessage.getMessage() +"<<<" + RESET_TEXT_COLOR);
     }
 
     @Override
-    public void load(LoadGame loadGame) throws Exception {
+    public void load(LoadGameMessage loadGameMessage) throws Exception {
         boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
-        whosTurn = loadGame.getGame().getTeamTurn();
-        isGameOver = loadGame.getGame().isGameOver();
-        boardData = loadGame.getGame().getBoard();
+        whosTurn = loadGameMessage.getGame().getTeamTurn();
+        isGameOver = loadGameMessage.getGame().isGameOver();
+        boardData = loadGameMessage.getGame().getBoard();
         PrintChessBoard.printChessBoardFromBoardData(boardData, isWhite);
     }
 
     @Override
-    public void warn(Error error) throws Exception {
-        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ error.getMessage() +"<<<"+ RESET_TEXT_COLOR);
+    public void warn(ErrorMessage errorMessage) throws Exception {
+        System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ errorMessage.getErrorMessage() +"<<<"+ RESET_TEXT_COLOR);
     }
 }

@@ -16,9 +16,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.ConnectionManager;
 import websocket.commands.*;
-import websocket.messages.Error;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 import java.util.Collection;
 
@@ -55,18 +55,20 @@ public class WebSocketHandler {
 
     public void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws Exception {
         try {
-            if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
-                String errorMessage = "You are not a player, so you cannot make a move in the game.";
-                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
-                return;
-            }
             AuthData userAuthData = dataAccess.getAuthData(makeMoveCommand.getAuthToken());
             GameData gameData = dataAccess.getGameData(makeMoveCommand.getGameID());
             ChessGame chessGameData = gameData.game();
+            if(chessGameData.isGameOver()){
+                session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game is over.")));
+            }
+            if(!isUserAuthorized(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID())) {
+                session.getRemote().sendString(gson.toJson(new ErrorMessage("You are not a player, so you cannot make a move in the game.")));
+                return;
+            }
             ChessMove move = makeMoveCommand.getMove();
-            if(!isValidMove(move, chessGameData)) {
+            if(!isValidMove(move, gameData, userAuthData.username())) {
                 String errorMessage = "Invalid move.";
-                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+                session.getRemote().sendString(gson.toJson(new ErrorMessage(errorMessage)));
                 return;
             }
             chessGameData.makeMove(move);
@@ -75,28 +77,30 @@ public class WebSocketHandler {
             String moveStartPosition = chessPositionToString(move.getStartPosition());
             String moveEndPosition = chessPositionToString(move.getEndPosition());
             String moveMessage = String.format("User %s made a move from %s to %s in game %s.", userAuthData.username(),moveStartPosition , moveEndPosition, gameData.gameName());
-            connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new Notification(moveMessage));
-            session.getRemote().sendString(gson.toJson(new LoadGame(chessGameData)));
-            connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGame(chessGameData));
+            connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(moveMessage));
+            session.getRemote().sendString(gson.toJson(new LoadGameMessage(chessGameData)));
+            connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGameMessage(chessGameData));
         }
         catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
+            session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
         }
     }
 
     public void connectToGame(ConnectCommand connectCommand, Session session) throws Exception {
         try {
-            connectionManager.addConnection(connectCommand.getAuthToken(), connectCommand.getGameID(), session);
-            if(connectCommand.getAuthToken() == null) {
-                session.getRemote().sendString(gson.toJson(new Error("User not found.")));
-                return;
-            }
             AuthData userAuthData = dataAccess.getAuthData(connectCommand.getAuthToken());
             GameData gameData = dataAccess.getGameData(connectCommand.getGameID());
             if(gameData.game() == null){
-                session.getRemote().sendString(gson.toJson(new Error("Game not found.")));
+                System.out.println("Sending error to the frontend");
+                session.getRemote().sendString(gson.toJson(new ErrorMessage("Game not found. Bad game ID")));
                 return;
             }
+            if(connectCommand.getAuthToken() == null) {
+                session.getRemote().sendString(gson.toJson(new ErrorMessage("User not found.")));
+                return;
+            }
+            connectionManager.addConnection(connectCommand.getAuthToken(), connectCommand.getGameID(), session);
+
             String playerText;
             if (gameData.whiteUsername().equals(userAuthData.username())) {
                 playerText = "white player";
@@ -108,11 +112,11 @@ public class WebSocketHandler {
                 playerText = "an observer";
             }
             String messageToSend = String.format("User %s joined game as %s", userAuthData.username(), playerText);
-            connectionManager.broadcastNotification(connectCommand.getAuthToken(), connectCommand.getGameID(), new Notification(messageToSend));
-            session.getRemote().sendString(gson.toJson(new LoadGame(gameData.game())));
+            connectionManager.broadcastNotification(connectCommand.getAuthToken(), connectCommand.getGameID(), new NotificationMessage(messageToSend));
+            session.getRemote().sendString(gson.toJson(new LoadGameMessage(gameData.game())));
         }
         catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
+            session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
         }
     }
 
@@ -120,7 +124,7 @@ public class WebSocketHandler {
         try {
             if (!isUserAuthorized(leaveCommand.getAuthToken(), leaveCommand.getGameID())) {
                 String errorMessage = "You are not a player, so you cannot leave the game.";
-                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+                session.getRemote().sendString(gson.toJson(new ErrorMessage(errorMessage)));
                 return;
             }
             AuthData userAuthData = dataAccess.getAuthData(leaveCommand.getAuthToken());
@@ -132,10 +136,10 @@ public class WebSocketHandler {
             }
             connectionManager.removeConnections(leaveCommand.getAuthToken());
             String leaveMessage = String.format("User %s left game %s", userAuthData.username(), gameData.gameName());
-            connectionManager.broadcastNotification(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new Notification(leaveMessage));
+            connectionManager.broadcastNotification(leaveCommand.getAuthToken(), leaveCommand.getGameID(), new NotificationMessage(leaveMessage));
         }
         catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
+            session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
         }
     }
 
@@ -143,7 +147,7 @@ public class WebSocketHandler {
         try {
             if (!isUserAuthorized(resignCommand.getAuthToken(), resignCommand.getGameID())) {
                 String errorMessage = "You are not a player, so you cannot resign from the game.";
-                session.getRemote().sendString(gson.toJson(new Error(errorMessage)));
+                session.getRemote().sendString(gson.toJson(new ErrorMessage(errorMessage)));
                 return;
             }
             AuthData userAuthData = dataAccess.getAuthData(resignCommand.getAuthToken());
@@ -152,10 +156,10 @@ public class WebSocketHandler {
             chessGame.setGameOver(true);
             dataAccess.updateGame(new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.gameID(), chessGame));
             String resignMessage = String.format("User %s resigned from game. You won", userAuthData.username());
-            connectionManager.broadcastNotification(resignCommand.getAuthToken(), resignCommand.getGameID(), new Notification(resignMessage));
+            connectionManager.broadcastNotification(resignCommand.getAuthToken(), resignCommand.getGameID(), new NotificationMessage(resignMessage));
         }
         catch (Exception e) {
-            session.getRemote().sendString(gson.toJson(new Error(e.getMessage())));
+            session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
         }
     }
 
@@ -165,14 +169,24 @@ public class WebSocketHandler {
         return userAuthData.username().equals(gameData.whiteUsername()) || userAuthData.username().equals(gameData.blackUsername());
     }
 
-    public boolean isValidMove(ChessMove move, ChessGame game) {
-        ChessGame.TeamColor currentTurn = game.getTeamTurn();
-        ChessBoard board = game.getBoard();
+    public boolean isValidMove(ChessMove move, GameData gameData, String playerUsername) {
+        ChessGame.TeamColor currentTurn = gameData.game().getTeamTurn();
+        ChessGame.TeamColor userMovingColor = null;
+        if(gameData.whiteUsername().equals(playerUsername)){
+            userMovingColor = ChessGame.TeamColor.WHITE;
+        }
+        else{
+            userMovingColor = ChessGame.TeamColor.BLACK;
+        }
+        if(userMovingColor != currentTurn ){
+            return false;
+        }
+        ChessBoard board = gameData.game().getBoard();
         ChessGame.TeamColor pieceMovingColor = board.getPiece(move.getStartPosition()).getTeamColor();
         if (pieceMovingColor != currentTurn) {
             return false;
         }
-        Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
+        Collection<ChessMove> validMoves = gameData.game().validMoves(move.getStartPosition());
         for (ChessMove validMove : validMoves) {
             if (validMove.getEndPosition().equals(move.getEndPosition())) {
                 return true;
