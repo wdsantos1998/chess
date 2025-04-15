@@ -1,13 +1,11 @@
 package server;
 
 import controller.AppHandler;
-import data.access.MemoryDataAccess;
 import data.access.MySqlDataAccess;
 import server.websocket.WebSocketHandler;
 import service.AppService;
 import spark.*;
 
-import javax.websocket.server.ServerContainer;
 
 import static spark.Spark.exception;
 

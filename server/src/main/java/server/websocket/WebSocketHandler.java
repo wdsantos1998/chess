@@ -5,10 +5,8 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import com.google.gson.Gson;
-import data.access.DataAccessExceptionHTTP;
 import model.AuthData;
 import model.GameData;
-import model.UserData;
 import org.eclipse.jetty.websocket.api.Session;
 
 import data.access.MySqlDataAccess;
