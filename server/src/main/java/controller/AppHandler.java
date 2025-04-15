@@ -78,7 +78,10 @@ public class AppHandler {
             try {
                 JsonObject requestJsonObject = GSON.fromJson(req.body(), JsonObject.class);
                 String authToken = req.headers("authorization");
-                if (authToken == null || !requestJsonObject.has("gameID") || !requestJsonObject.has("playerColor")) {
+                if (authToken == null) {
+                    throw new DataAccessExceptionHTTP(400, "Error: bad request");
+                }
+                if (!requestJsonObject.has("gameID") || !requestJsonObject.has("playerColor")) {
                     throw new DataAccessExceptionHTTP(400, "Error: bad request");
                 }
 
