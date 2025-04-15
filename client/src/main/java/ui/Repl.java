@@ -155,19 +155,6 @@ public class Repl implements NotificationHandler {
                                 }
                                 isInAGame = true;
                             }
-                            case "observe", "observe game" -> {
-                                System.out.print("Enter Game ID to observe: ");
-                                String observeString = scanner.nextLine();
-                                try {
-                                    this.gameID = Integer.parseInt(observeString);
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid input. Please enter a valid integer.");
-                                    return;
-                                }
-                                System.out.println("Observing as WHITE.");
-                                PrintChessBoard.printGenericBoard("white");
-                                isInAGame = true;
-                            }
                             case "logout" -> {
                                 client.logout();
                                 isInAGame = false;
