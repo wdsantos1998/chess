@@ -258,6 +258,16 @@ public class Repl implements NotificationHandler {
                                     isInAGame = false;
                                     System.out.println("Left game successfully.");
                                 }
+                                case "legal", "legal moves" -> {
+                                    System.out.print("Enter piece position (e.g., e2): ");
+                                    String move = scanner.nextLine().trim().toLowerCase();
+                                    if (!move.matches("^[a-h][1-8]$")) {
+                                        System.out.println("Invalid input. Please enter a position like 'e2' (a-h, 1-8).");
+                                        return;
+                                    }
+                                    ChessPosition from = parseChessPosition(move.trim().toLowerCase());
+                                    highlightLegalMoves(from);
+                                }
                                 default -> {
                                     System.out.println("Unknown command.");
                                 }
