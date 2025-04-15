@@ -1,40 +1,50 @@
-package chess.movescalculator;
+package chess.movescalculator.utils;
 
 import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import chess.movescalculator.utils.AbstractSlidingPiecesMovesCalculator;
+import chess.movescalculator.PieceMovesCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-public class KingMovesCalculator implements PieceMovesCalculator {
-
-    private static final int[][] KING_MOVES = {
-                {-1, -1},
-                {-1, 0},
-                {-1, 1},
-                {0, -1},
-                {0, 1},
-                {1, -1},
-                {1, 0},
-                {1, 1},
-        };
-
+public abstract class AbstractMovesCalculator implements PieceMovesCalculator {
     @Override
     public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition myPosition) {
+        return List.of();
+    }
+
+    protected Collection<ChessMove> calculateMovesInDirections(
+            ChessBoard board,
+            ChessPosition start,
+            int[][] directions,
+            boolean repeat
+    ) {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
-        for (int[] move : KING_MOVES) {
-            int newRow = myPosition.getRow() + move[0];
-            int newCol = myPosition.getColumn() + move[1];
-            ChessPosition newPos = new ChessPosition(newRow, newCol);
+        for (int[] dir : directions) {
+            int row = start.getRow();
+            int col = start.getColumn();
 
-            if (isValidMove(board, myPosition, newPos)) {
-                validMoves.add(new ChessMove(myPosition, newPos, null));
+            while (true) {
+                row += dir[0];
+                col += dir[1];
+                ChessPosition newPos = new ChessPosition(row, col);
+
+                if (!isWithinBoard(newPos)) break;
+
+                if (!isValidMove(board, start, newPos)) break;
+
+                validMoves.add(new ChessMove(start, newPos, null));
+
+                if (board.getPiece(newPos) != null) break; // Stop if capturing
+
+                if (!repeat) break;
             }
         }
+
         return validMoves;
     }
 
@@ -53,21 +63,10 @@ public class KingMovesCalculator implements PieceMovesCalculator {
         else if (myPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
             return false;
         }
-
         return true;
     }
 
     private boolean isWithinBoard(ChessPosition targetPosition) {
         return targetPosition.getRow() >= 1 && targetPosition.getRow() <= 8 && targetPosition.getColumn() >= 1 && targetPosition.getColumn() <= 8;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
     }
 }

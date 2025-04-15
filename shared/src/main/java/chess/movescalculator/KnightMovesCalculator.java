@@ -4,59 +4,24 @@ import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import chess.movescalculator.utils.AbstractMovesCalculator;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-public class KnightMovesCalculator implements PieceMovesCalculator {
+public class KnightMovesCalculator extends AbstractMovesCalculator {
 
-    private int[][] getKnightMoves() {
-        return new int[][] {
+    private static final int[][] KNIGHT_MOVES = {
                 {1,2},{1,-2},
                 {-1,2},{-1,-2},
                 {2,1},{2,-1},
                 {-2,1},{-2,-1}
-        };
-    }
+    };
 
     @Override
     public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition myPosition) {
-        int[][] knightMoves = getKnightMoves();
-        Collection<ChessMove> validMoves = new ArrayList<>();
-
-        for (int[] move : knightMoves) {
-            int newRow = myPosition.getRow() + move[0];
-            int newCol = myPosition.getColumn() + move[1];
-            ChessPosition newPos = new ChessPosition(newRow, newCol);
-
-            if (isValidMove(board, myPosition, newPos)) {
-                validMoves.add(new ChessMove(myPosition, newPos, null));
-            }
-        }
-        return validMoves;
+        return calculateMovesInDirections(board,myPosition,KNIGHT_MOVES,false);
     }
 
-    @Override
-    public boolean isValidMove(ChessBoard board, ChessPosition myPosition, ChessPosition targetPosition) {
-        if (!isWithinBoard(targetPosition)) {
-            return false;
-        }
-        ChessPiece myPiece = board.getPiece(myPosition);
-        ChessPiece targetPiece = board.getPiece(targetPosition);
-
-        if (targetPiece == null) {
-            return true;
-        }
-
-        else if (myPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isWithinBoard(ChessPosition targetPosition) {
-        return targetPosition.getRow() >= 1 && targetPosition.getRow() <= 8 && targetPosition.getColumn() >= 1 && targetPosition.getColumn() <= 8;
-    }
 
     @Override
     public int hashCode() {
