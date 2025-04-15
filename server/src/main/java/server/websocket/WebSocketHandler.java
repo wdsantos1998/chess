@@ -5,8 +5,10 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import com.google.gson.Gson;
+import data.access.DataAccessExceptionHTTP;
 import model.AuthData;
 import model.GameData;
+import model.UserData;
 import org.eclipse.jetty.websocket.api.Session;
 
 import data.access.MySqlDataAccess;
@@ -82,17 +84,9 @@ public class WebSocketHandler {
 
             ChessGame.TeamColor opponentColor = gameData.whiteUsername().equals(userAuthData.username())? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             String opponentUsername = gameData.whiteUsername().equals(userAuthData.username()) ? gameData.blackUsername() : gameData.whiteUsername();
-
-            if(chessGameData.isInCheck(opponentColor)){
-                String isInCheckMessage = String.format("User %s is in check", opponentUsername);
-                connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(isInCheckMessage));
-            }
-            if(chessGameData.isInCheckmate(opponentColor)){
-                String isInCheckMate = String.format("User %s is in checkmate", opponentUsername);
-                connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(isInCheckMate));
-            }
             session.getRemote().sendString(gson.toJson(new LoadGameMessage(chessGameData)));
             connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGameMessage(chessGameData));
+            notifyIfChecked(gameData,opponentUsername,opponentColor,makeMoveCommand,session);
         }
         catch (Exception e) {
             session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
@@ -214,6 +208,19 @@ public class WebSocketHandler {
         }
         return false;
     }
+
+    private void notifyIfChecked(GameData gameData, String opponentUsername ,ChessGame.TeamColor opponentColor, MakeMoveCommand makeMoveCommand, Session session)  throws Exception {
+        try {
+            if (gameData.game().isInCheckmate(opponentColor)) {
+                gameData.game().setGameOver(true);
+                dataAccess.updateGame(new GameData(gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(),gameData.gameID(),gameData.game()));
+            }
+        }
+        catch (Exception e){
+            session.getRemote().sendString(gson.toJson(new ErrorMessage(e.getMessage())));
+        }
+    }
+
 
     private String chessPositionToString(ChessPosition position){
         char file = (char) ('a' + (position.getColumn() - 1));
