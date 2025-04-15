@@ -209,7 +209,7 @@ public class Repl implements NotificationHandler {
                                 }
                                 ChessPosition from = parseChessPosition(partsMove[0].trim().toLowerCase());
                                 ChessPosition to = parseChessPosition(partsMove[1].trim().toLowerCase());
-                                client.makeMove(this.gameID, from, to, move);
+                                client.makeMove(this.gameID, from, to);
                             } else {
                                 System.out.println("You cannot make a move as an observer");
                             }

@@ -113,13 +113,13 @@ public class ChessClient {
         }
     }
 
-    public void makeMove(int gameID, ChessPosition from, ChessPosition to, String moveString) throws Exception{
+    public void makeMove(int gameID, ChessPosition from, ChessPosition to) throws Exception{
         turnGameListIntoSequenceOfIndexes(server.listGames(userToken.authToken()));
         if(!gameMap.containsKey(gameID)){
             throw new Exception("Error: gameID not found");
         }
         try{
-            webSocket.makeMove(userToken.authToken(), gameMap.get(gameID), from, to, moveString);
+            webSocket.makeMove(userToken.authToken(), gameMap.get(gameID), from, to);
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }

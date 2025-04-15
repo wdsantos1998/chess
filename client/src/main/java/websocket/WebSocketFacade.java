@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
 
 @ClientEndpoint
 public class WebSocketFacade {
-    private Session session;
+    private final Session session;
     private final NotificationHandler notificationHandler;
     private final Gson gson = new Gson();
 
@@ -94,7 +94,7 @@ public class WebSocketFacade {
         }
     }
 
-    public void makeMove(String authToken, Integer gameID, ChessPosition from, ChessPosition to, String moveString) throws ExceptionResponse {
+    public void makeMove(String authToken, Integer gameID, ChessPosition from, ChessPosition to) throws ExceptionResponse {
         try {
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, new ChessMove(from, to, null));
             this.session.getBasicRemote().sendText(gson.toJson(command));
