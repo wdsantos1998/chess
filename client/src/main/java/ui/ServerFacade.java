@@ -20,8 +20,8 @@ public class ServerFacade {
     private final Gson gson;
 
 
-    public ServerFacade(String URLrequest ){
-        this.serverUrl = URLrequest;
+    public ServerFacade(String urlRequest ){
+        this.serverUrl = urlRequest;
         this.httpClient = httpClient.newHttpClient();
         this.gson = new Gson();
     }
