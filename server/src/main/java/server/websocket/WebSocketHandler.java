@@ -83,13 +83,13 @@ public class WebSocketHandler {
             ChessGame.TeamColor opponentColor = gameData.whiteUsername().equals(userAuthData.username())? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             String opponentUsername = gameData.whiteUsername().equals(userAuthData.username()) ? gameData.blackUsername() : gameData.whiteUsername();
 
-            if(chessGameData.isInCheckmate(opponentColor)){
-                String isInCheckMate = String.format("User %s is in checkmate", opponentUsername);
-                connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(isInCheckMate));
-            }
             if(chessGameData.isInCheck(opponentColor)){
                 String isInCheckMessage = String.format("User %s is in check", opponentUsername);
                 connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(isInCheckMessage));
+            }
+            if(chessGameData.isInCheckmate(opponentColor)){
+                String isInCheckMate = String.format("User %s is in checkmate", opponentUsername);
+                connectionManager.broadcastNotification(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new NotificationMessage(isInCheckMate));
             }
             session.getRemote().sendString(gson.toJson(new LoadGameMessage(chessGameData)));
             connectionManager.broadcastGame(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), new LoadGameMessage(chessGameData));
