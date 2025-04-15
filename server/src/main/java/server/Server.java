@@ -22,7 +22,7 @@ public class Server {
         AppService appService = new AppService(mySqlDataAccess);
         AppHandler userHandler = new AppHandler(appService);
         WebSocketHandler webSocketHandler = new WebSocketHandler();
-        Spark.webSocket("/ws", webSocketHandler);
+        Spark.webSocket("/connect", webSocketHandler);
         webSocketHandler.setMySqlDataAccess(mySqlDataAccess);
         userHandler.startRoutes();
 

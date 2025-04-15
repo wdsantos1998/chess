@@ -1,9 +1,8 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.Collection;
 
 public class PrintChessBoard {
     private static final int BOARD_SIZE = 8;
@@ -188,5 +187,63 @@ public class PrintChessBoard {
                 return EscapeSequences.EMPTY;
         }
     }
+
+    public static void printHighlightedBoard(ChessBoard board, boolean reverse,
+                                             ChessPosition selectedPosition,
+                                             Collection<ChessMove> legalMoves) {
+        System.out.println();
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR + "   ");
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            char c = (char) (reverse ? 'H' - i : 'A' + i);
+            System.out.print(" " + c + " ");
+        }
+        System.out.println();
+
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            int row = reverse ? r : BOARD_SIZE - 1 - r;
+            System.out.print(EscapeSequences.RESET_TEXT_COLOR + " " + (row + 1) + " ");
+
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                int col = reverse ? BOARD_SIZE - 1 - c : c;
+                ChessPosition currentPos = new ChessPosition(row + 1, col + 1);
+
+                boolean isSelected = currentPos.equals(selectedPosition);
+                boolean isLegalTarget = legalMoves.stream()
+                        .anyMatch(move -> move.getEndPosition().equals(currentPos));
+
+                // Set background color
+                if (isSelected) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW);
+                } else if (isLegalTarget) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+                } else if ((row + col) % 2 == 0) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                } else {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                }
+
+                ChessPiece piece = board.getPiece(currentPos);
+                if (piece != null) {
+                    boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
+                    System.out.print(getPieceRepresentation(piece.getPieceType(), isWhite));
+                } else {
+                    System.out.print(EscapeSequences.EMPTY);
+                }
+
+                System.out.print(EscapeSequences.RESET_BG_COLOR);
+            }
+
+            System.out.println(EscapeSequences.RESET_TEXT_COLOR + " " + (row + 1));
+        }
+
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR + "   ");
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            char c = (char) (reverse ? 'H' - i : 'A' + i);
+            System.out.print(" " + c + " ");
+        }
+        System.out.println();
+    }
+
+
 
 }

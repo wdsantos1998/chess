@@ -1,6 +1,7 @@
 package ui;
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPosition;
 import model.GameData;
 import model.LoginRequest;
@@ -9,8 +10,11 @@ import websocket.NotificationHandler;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ErrorMessage;
+
+import java.util.Collection;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
+import static ui.PrintChessBoard.printHighlightedBoard;
 
 public class Repl implements NotificationHandler {
         private final Scanner scanner;
@@ -23,6 +27,7 @@ public class Repl implements NotificationHandler {
         private boolean isGameOver = false;
         private ChessGame.TeamColor whosTurn = ChessGame.TeamColor.WHITE;
         private ChessBoard boardData;
+        private ChessGame gameData;
 
 
         public Repl (String url){
@@ -199,7 +204,7 @@ public class Repl implements NotificationHandler {
                                     gameID = 0;
                                     System.out.println("Left game successfully.");
                                 }
-                                case "make", "make move" -> {
+                                case "move", "make move" -> {
                                     if(isGameOver) {
                                         System.out.println("Game is over. You cannot make a move.");
                                         return;
@@ -232,6 +237,16 @@ public class Repl implements NotificationHandler {
                                     }
                                     client.resignFromGame(this.gameID);
                                     System.out.println("Resigned from game successfully. You lost. You may leave the game.");
+                                }
+                                case "legal", "legal moves" -> {
+                                    System.out.print("Enter piece position (e.g., e2): ");
+                                    String move = scanner.nextLine().trim().toLowerCase();
+                                    if (!move.matches("^[a-h][1-8]$")) {
+                                        System.out.println("Invalid input. Please enter a position like 'e2' (a-h, 1-8).");
+                                        return;
+                                    }
+                                    ChessPosition from = parseChessPosition(move.trim().toLowerCase());
+                                    highlightLegalMoves(from);
                                 }
                                 default -> {
                                     System.out.println("Unknown command.");
@@ -298,9 +313,17 @@ public class Repl implements NotificationHandler {
         PrintChessBoard.printChessBoardFromBoardData(boardData, isWhite);
     }
 
+    private void highlightLegalMoves(ChessPosition referencePosition){
+        Collection<ChessMove> validMoves = gameData.validMoves(referencePosition);
+        boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
+        printHighlightedBoard(boardData,isWhite,referencePosition,validMoves);
+    }
+
+
     @Override
     public void notify(NotificationMessage notificationMessage) throws Exception {
         System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ notificationMessage.getMessage() +"<<<" + RESET_TEXT_COLOR);
+        System.out.print("Enter command: ");
     }
 
     @Override
@@ -308,12 +331,15 @@ public class Repl implements NotificationHandler {
         boolean isWhite = this.teamColor != ChessGame.TeamColor.WHITE;
         whosTurn = loadGameMessage.getGame().getTeamTurn();
         isGameOver = loadGameMessage.getGame().isGameOver();
+        gameData = loadGameMessage.getGame();
         boardData = loadGameMessage.getGame().getBoard();
         PrintChessBoard.printChessBoardFromBoardData(boardData, isWhite);
+        System.out.print("Enter command: ");
     }
 
     @Override
     public void warn(ErrorMessage errorMessage) throws Exception {
         System.out.println("\n"+SET_TEXT_COLOR_GREEN +">>>"+ errorMessage.getErrorMessage() +"<<<"+ RESET_TEXT_COLOR);
+        System.out.print("Enter command: ");
     }
 }
