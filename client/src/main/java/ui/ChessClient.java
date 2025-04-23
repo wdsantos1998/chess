@@ -81,7 +81,7 @@ public class ChessClient {
                 server.joinGame(new JoinGameRequest(userToken.authToken(),playerColor, gameMap.get(gameID)));
 
                 webSocket = new WebSocketFacade(notificationHandler, serverUrl);
-            webSocket.connectAsPlayer(userToken.authToken(), gameMap.get(gameID));
+            webSocket.connectToGame(userToken.authToken(), gameMap.get(gameID));
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }
@@ -99,7 +99,7 @@ public class ChessClient {
             catch (Exception e){
                 throw new Exception(handleException(e.getMessage()));
             }
-            webSocket.connectAsObserver(userToken.authToken(), gameMap.get(gameID));
+            webSocket.connectToGame(userToken.authToken(), gameMap.get(gameID));
         } catch (Exception e) {
             throw new Exception(handleException(e.getMessage()));
         }

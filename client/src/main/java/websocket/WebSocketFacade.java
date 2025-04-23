@@ -67,16 +67,7 @@ public class WebSocketFacade {
         }
     }
 
-    public void connectAsPlayer(String authToken, Integer gameID) throws ExceptionResponse {
-        try {
-            ConnectCommand command = new ConnectCommand(authToken, gameID);
-            this.session.getBasicRemote().sendText(gson.toJson(command));
-        } catch (IOException e) {
-            throw new ExceptionResponse(500, e.getMessage());
-        }
-    }
-
-    public void connectAsObserver(String authToken, Integer gameID) throws ExceptionResponse {
+    public void connectToGame(String authToken, Integer gameID) throws ExceptionResponse {
         try {
             ConnectCommand command = new ConnectCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(gson.toJson(command));
