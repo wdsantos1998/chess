@@ -19,7 +19,6 @@ public class AppHandler {
     public AppHandler(AppService appService) {
         this.appService = appService;
     }
-    //Comment
 
     public void startRoutes() {
         post("/user", (req, res) -> {

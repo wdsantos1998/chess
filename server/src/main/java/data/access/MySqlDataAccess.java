@@ -115,7 +115,11 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public GameData createGame(GameData gameData) throws DataAccessExceptionHTTP {
         var statement = "INSERT INTO game_data (gameID, whiteUsername,blackUsername,gameName,game) VALUES (?, ?, ?, ?, ?)";
-        executeUpdate(statement,gameData.gameID(),gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(), GSON.toJson(gameData.game()));
+        executeUpdate(statement,gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                GSON.toJson(gameData.game()));
         return gameData;
     }
 
@@ -158,7 +162,10 @@ public class MySqlDataAccess implements DataAccess {
                     List<GameListData> gameDataList = new ArrayList<>();
                     while (rs.next()) {
                         GameData gameDataFromDatabase = readGameData(rs);
-                        GameListData gameListData = new GameListData(gameDataFromDatabase.gameID(),gameDataFromDatabase.whiteUsername(),gameDataFromDatabase.blackUsername(),gameDataFromDatabase.gameName());
+                        GameListData gameListData = new GameListData(gameDataFromDatabase.gameID(),
+                                gameDataFromDatabase.whiteUsername(),
+                                gameDataFromDatabase.blackUsername(),
+                                gameDataFromDatabase.gameName());
                         gameDataList.add(gameListData);
                     }
                     return gameDataList;

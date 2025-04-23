@@ -45,9 +45,28 @@ public class DatabaseManager {
     }
 
     static void createDataBaseTables() throws DataAccessExceptionHTTP {
-        String userTable = "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(100));";
-        String authTokenTable = "CREATE TABLE IF NOT EXISTS auth_token (id INT AUTO_INCREMENT PRIMARY KEY, authToken VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci, username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci);";
-        String gameDataTable = "CREATE TABLE IF NOT EXISTS game_data (id INT AUTO_INCREMENT PRIMARY KEY, gameID INT UNIQUE, whiteUsername VARCHAR(100) NULL, blackUsername VARCHAR(100) NULL, gameName VARCHAR(100), game JSON);";
+        String userTable = "CREATE TABLE IF NOT EXISTS users ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci UNIQUE NOT NULL, "
+                + "password VARCHAR(255) NOT NULL, "
+                + "email VARCHAR(100)"
+                + ");";
+
+        String authTokenTable = "CREATE TABLE IF NOT EXISTS auth_token ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "authToken VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci, "
+                + "username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci"
+                + ");";
+
+        String gameDataTable = "CREATE TABLE IF NOT EXISTS game_data ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "gameID INT UNIQUE, "
+                + "whiteUsername VARCHAR(100) NULL, "
+                + "blackUsername VARCHAR(100) NULL, "
+                + "gameName VARCHAR(100), "
+                + "game JSON"
+                + ");";
+
 
         String[] sqlTables = {userTable,authTokenTable,gameDataTable};
 
