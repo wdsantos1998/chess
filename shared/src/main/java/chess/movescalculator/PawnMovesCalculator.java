@@ -91,8 +91,12 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
         PawnMovesCalculator that = (PawnMovesCalculator) o;
         return isFirstMove == that.isFirstMove;
     }

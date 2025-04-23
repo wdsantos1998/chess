@@ -33,15 +33,23 @@ public abstract class AbstractMovesCalculator implements PieceMovesCalculator {
                 col += dir[1];
                 ChessPosition newPos = new ChessPosition(row, col);
 
-                if (!isWithinBoard(newPos)) break;
+                if (!isWithinBoard(newPos)){
+                    break;
+                }
 
-                if (!isValidMove(board, start, newPos)) break;
+                if (!isValidMove(board, start, newPos)){
+                    break;
+                }
 
                 validMoves.add(new ChessMove(start, newPos, null));
 
-                if (board.getPiece(newPos) != null) break; // Stop if capturing
+                if (board.getPiece(newPos) != null){
+                    break; // Stop if capturing
+                }
 
-                if (!repeat) break;
+                if (!repeat){
+                    break;
+                }
             }
         }
 
